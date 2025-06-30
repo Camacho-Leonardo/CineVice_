@@ -1,0 +1,12 @@
+
+<div class="genero-select">
+    <select id="generoDropdown">
+        <option value="">-- Ver por género --</option>
+        <?php
+        $genDropdown = mysqli_query($conexion, "SELECT * FROM generos");
+        while ($g = mysqli_fetch_assoc($genDropdown)) {
+            echo '<option value="' . strtolower($g['nombre']) . '">' . ucfirst($g['nombre']) . '</option>';
+        }
+        ?>
+    </select>
+</div>
