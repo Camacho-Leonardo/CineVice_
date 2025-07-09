@@ -1,3 +1,5 @@
+<?php session_start(); ?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -29,12 +31,18 @@
             </nav>
         </div>
 
-        <div class="logs-container">
-            <div class="logs">
-                <a href="./Páginas/formularios.php?inicio"><button class="log-in">Iniciar sesión</button></a>
-                <a href="./Páginas/formularios.php?registro"><button class="sing-in">Registrarse</button></a>
-            </div>
-        </div>
+<div class="logs-container">
+    <div class="logs">
+        <?php if (isset($_SESSION['usuario'])): ?>
+            <span class="nav-username">👤 <?php echo htmlspecialchars($_SESSION['usuario']['nombre']); ?></span>
+            <a href="./Páginas/perfil.php"><button>Perfil</button></a>
+            <a href="./Páginas/logout.php"><button class="log-out">Cerrar sesión</button></a>
+        <?php else: ?>
+            <a href="./Páginas/formularios.php?inicio"><button class="log-in">Iniciar sesión</button></a>
+            <a href="./Páginas/formularios.php?registro"><button class="sing-in">Registrarse</button></a>
+        <?php endif; ?>
+    </div>
+</div>
     </header>
 
     <main>

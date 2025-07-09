@@ -3,6 +3,8 @@ DROP DATABASE IF EXISTS cinevice;
 CREATE DATABASE cinevice;
 USE cinevice;
 
+
+
 -- TABLA ESTADOS
 CREATE TABLE estados (
   est_id INT PRIMARY KEY AUTO_INCREMENT,
@@ -143,8 +145,10 @@ CREATE TABLE usu_pro (
 );
 
 -- ========================
--- DATOS DE PRUEBA
+-- DATOS DE PRUEBA 
 -- ========================
+
+
 
 -- ESTADOS
 INSERT INTO estados (est_id, nombre) VALUES
@@ -205,7 +209,7 @@ INSERT INTO pelis (peli_id, nombre, descripcion, emision, duracion, episodios, t
 (1017,"Merlina","Nada",2013,'00:00:00',1,1,"USA","Inglés",1,"merlina.jpg"),
 (1018,"El oficina","Nada",2013,'00:00:00',1,1,"USA","Inglés",1,"el_oficina.jpg"),
 (1019,"You","Nada",2013,'00:00:00',1,1,"USA","Inglés",1,"you.jpg"),
-(1020,"Yo antes de tí","Nada",2013,'00:00:00',1,1,"USA","Inglés",1,"yo_antes_de_ti.jpg"),
+(1020,"Yo antes de tí","Una joven forma un vínculo improbable con un hombre discapacitado del que está cuidando.",2016,'01:50:00',0,1,"Hispanoamérica","Español(España)",1,"yo_antes_de_ti.jpg"),
 (1021,"We were liars","Nada",2013,'00:00:00',1,1,"USA","Inglés",1,"we_were_liars.jpg"),
 (1022,"love","Nada",2013,'00:00:00',1,1,"USA","Inglés",1,"love.jpg"),
 (1023,"Grey's Anatomy","Nada",2013,'00:00:00',1,1,"USA","Inglés",1,"greys_anatomy.jpg"),

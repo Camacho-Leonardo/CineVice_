@@ -1,70 +1,77 @@
-<!DOCTYPE html>
-<html lang="en">
+<?php
+session_start();
+require_once("../conexion.php");
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Foros</title>
-    <link rel="stylesheet" href="../Estilos/estilos.css">
-    <link rel="icon" type="image/x-icon" href="../Imágenes/favicon.png">
-    <style>
-        #h1{
-            font-size: 80px;
-            position: absolute;
-            top: 50%;
-            left: 40%;
-        }
-    </style>
-</head>
+// LOGIN
+if (isset($_POST['inicioUsu'])) {
+    $email = $_POST['email'];
+    $password = $_POST['password'];
 
-<body>
-    <header>
-        <div class="title-container">
-            <div class="title">
-                <a href="../index.php" id="home-link">
-                    <h1>Cine<strong id="colored-h1">Vice</strong></h1>
-                </a>
-            </div>
-        </div>
+    $stmt = $conexion->prepare("SELECT * FROM usuarios WHERE email = ? AND est_id = 1");
+    $stmt->bind_param("s", $email);
+    $stmt->execute();
+    $resultado = $stmt->get_result();
+    $usuario = $resultado->fetch_assoc();
+    $stmt->close();
 
-        <div class="nav-bar-container">
-            <nav class="nav-bar">
-                <ul>
-                    <li><a href="./es_cine/peliculas_series.php">Películas/Series</a></li>
-                    <li><a href="../foros.php">Foros</a></li> 
-                </ul>
-            </nav>
-        </div>
+    if ($usuario && $password === $usuario['clave']) {
+        $_SESSION['usuario'] = [
+            'id' => $usuario['usu_id'],
+            'nombre' => $usuario['nombre'],
+            'email' => $usuario['email'],
+            'imagen' => $usuario['imagen']
+        ];
+        header("Location: perfil.php");
+        exit;
+    } else {
+        echo "<h2 style='color:red; text-align:center;'>Credenciales incorrectas</h2>";
+        echo "<p style='text-align:center;'><a href='formularios.php?inicio'>Volver a intentar</a></p>";
+    }
 
-        <div class="logs-container">
-            <div class="logs">
-                <a href="../Páginas/formularios.php?inicio"><button class="log-in">Iniciar sesión</button></a>
-                <a href="../Páginas/formularios.php?registro"><button class="sing-in">Registrarse</button></a>
-            </div>
-        </div>
-    </header>
-  
-    <?php
-        if(isset($_POST['emailrec'])){
-           ?>
-            <h1>Email de recuperacion enviado</h1>   
-           
-        <?php
-        }else if(isset($_POST['registroUsu'])){
-            ?>
-            <h1>Cuenta registrada</h1>
-            
-            
-            <?php
-        }else if(isset($_POST['inicioUsu'])){
-            if($_POST['email']=="admin@admin.com" && $_POST['password']=="123456"){
-                echo "Bienvenido";
-            }else{
-                echo "credenciales Incorrectas";
-            }
-        }
-    
-    ?>
-</body>
+// REGISTRO
+} elseif (isset($_POST['registroUsu'])) {
+    $email = $_POST['email'];
+    $nombre = $_POST['username'];
+    $password = $_POST['password'];
+    $password2 = $_POST['password2'];
 
-</html>
+    if ($password !== $password2) {
+        echo "<h2 style='color:red; text-align:center;'>Las contraseñas no coinciden</h2>";
+        echo "<p style='text-align:center;'><a href='formularios.php?registro'>Volver</a></p>";
+        exit;
+    }
+
+    // Evitar duplicados
+    $stmt = $conexion->prepare("SELECT usu_id FROM usuarios WHERE email = ?");
+    $stmt->bind_param("s", $email);
+    $stmt->execute();
+    $stmt->store_result();
+    if ($stmt->num_rows > 0) {
+        echo "<h2 style='color:red; text-align:center;'>Este correo ya está registrado</h2>";
+        echo "<p style='text-align:center;'><a href='formularios.php?registro'>Volver</a></p>";
+        exit;
+    }
+    $stmt->close();
+
+    // Insertar usuario nuevo
+    $rol = 2; // usuario común
+    $est = 1; // activo
+    $imagen = ""; // predeterminado
+
+    $stmt = $conexion->prepare("INSERT INTO usuarios (rol_id, nombre, email, clave, est_id, imagen) VALUES (?, ?, ?, ?, ?, ?)");
+    $stmt->bind_param("isssis", $rol, $nombre, $email, $password, $est, $imagen);
+    if ($stmt->execute()) {
+        echo "<h2 style='color:green; text-align:center;'>Cuenta registrada correctamente</h2>";
+        echo "<p style='text-align:center;'><a href='formularios.php?inicio'>Iniciar sesión</a></p>";
+    } else {
+        echo "<h2 style='color:red; text-align:center;'>Error al registrar</h2>";
+    }
+    $stmt->close();
+
+// RECUPERACIÓN
+} elseif (isset($_POST['emailrec'])) {
+    echo "<h2 style='text-align:center;'>Se ha enviado un correo de recuperación (simulado)</h2>";
+} else {
+    echo "<h2 style='color:red; text-align:center;'>Acceso inválido</h2>";
+}
+?>

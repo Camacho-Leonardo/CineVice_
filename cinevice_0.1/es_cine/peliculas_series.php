@@ -1,3 +1,4 @@
+<?php session_start(); ?>
 
 <?php require_once("conexion.php"); ?>
 <!DOCTYPE html>
@@ -35,10 +36,16 @@
             ?>
         </select>
     </div>
-    <div class="nav-right">
+<div class="nav-right">
+    <?php if (isset($_SESSION['usuario'])): ?>
+        <span class="nav-username">👤 <?php echo htmlspecialchars($_SESSION['usuario']['nombre']); ?></span>
+        <a href="./Páginas/perfil.php"><button>Perfil</button></a>
+        <a href="./Páginas/logout.php"><button class="log-out">Cerrar sesión</button></a>
+    <?php else: ?>
         <a href="./Páginas/formularios.php?inicio"><button class="log-in">Iniciar sesión</button></a>
-                <a href="./Páginas/formularios.php?registro"><button class="sing-in">Registrarse</button></a>
-    </div>
+        <a href="./Páginas/formularios.php?registro"><button class="sing-in">Registrarse</button></a>
+    <?php endif; ?>
+</div>
 </header>
 
 <div id="mensaje-error" class="mensaje-flotante">Búsqueda no encontrada</div>
