@@ -14,7 +14,7 @@ Actualmente el proyecto se encuentra en una **fase temprana de desarrollo**.
 - **TailwindCSS** (en integración)
 
 ### Planeadas a futuro
-- **Backend:** AJAX / Fetch API, SlimPHP  
+- **Backend:** AJAX / Fetch API, Laravel  
 - **Frontend:** Alpine.js, TailwindCSS, JavaScript  
 
 ---
