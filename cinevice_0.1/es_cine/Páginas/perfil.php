@@ -7,12 +7,18 @@ if (!isset($_SESSION['usuario'])) {
 
 require_once("../conexion.php");
 $usuario = $_SESSION['usuario'];
+
+// Si entró con contraseña temporal, lo redirigimos a cambio de contraseña
+if (isset($_SESSION['temporal']) && $_SESSION['temporal'] === true) {
+    header("Location: cambiar_clave.php");
+    exit;
+}
 ?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Mi Perfil</title>
+    <title>Mi Perfil - CineVice</title>
     <link rel="stylesheet" href="../style.css">
     <link rel="icon" type="image/x-icon" href="../Imágenes/favicon.png">
 </head>
@@ -49,8 +55,6 @@ $usuario = $_SESSION['usuario'];
         <a href="./logout.php"><button class="log-out">Cerrar sesión</button></a>
     </div>
 </header>
-
-<div id="mensaje-error" class="mensaje-flotante">Búsqueda no encontrada</div>
 
 <main style="padding: 40px; color: white;">
     <h1>👋 Bienvenido, <?php echo htmlspecialchars($usuario['nombre']); ?></h1>
