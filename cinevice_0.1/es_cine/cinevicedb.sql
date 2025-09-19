@@ -181,7 +181,10 @@ INSERT INTO generos (gen_id, nombre, descripcion) VALUES
 (2, "terror", "Asusta"),
 (3, "comedia", "Da gracia, divertida"),
 (4, "fantasia", "No realista, magia, etc"),
-(5, "acción","Adrenalina");
+(5, "acción","Adrenalina"),
+(6,"Próximos lanzamientos","test"),
+(7,"Películas más populares","test1"),
+(8,"Series más populares","test2");
 
 -- TIPOS
 INSERT INTO tipos (tipo_id, descripcion) VALUES
@@ -246,7 +249,10 @@ INSERT INTO pelis (peli_id, nombre, descripcion, emision, duracion, episodios, t
 (1054,"Jurassic Park","Nada",2013,'00:00:00',1,1,"USA","Inglés",1,"jurassic_park.jpg"),
 (1055,"lv rbts","Nada",2013,'00:00:00',1,1,"USA","Inglés",1,"lv_rbts.jpg"),
 (1056,"Otro día para matar","Nada",2013,'00:00:00',1,1,"USA","Inglés",1,"otro_dia_para_matar.jpg"),
-(1057,"Paradise","Nada",2013,'00:00:00',1,1,"USA","Inglés",1,"paradise.jpg");
+(1057,"Paradise","Nada",2013,'00:00:00',1,1,"USA","Inglés",1,"paradise.jpg"),
+(1058,"Cómo entrenar a tu dragón","Nada",2013,'00:00:00',1,1,"USA","Inglés",1,"comoentrenaratudragon.jpg"),
+(1059,"Los pecadores","Nada",2013,'00:00:00',1,1,"USA","Inglés",1,"lospecadores.jpg"),
+(1060,"The Last of Us","Nada",2013,'00:00:00',1,1,"USA","Inglés",1,"thelastofus.jpg");
 
 
 
@@ -314,7 +320,13 @@ INSERT INTO pelis_generos (peli_id, gen_id) VALUES
 (1054,5), -- accion
 (1055,5), -- accion
 (1056,5), -- accion 
-(1057,5); -- accion
+(1057,5), -- accion
+(1058,6), -- Proximos lanzamientos
+(1059,7), -- Peliculas mas populares
+(1060,8) -- Series mas populares
+
+
+; 
 -- ORIGENES
 INSERT INTO origenes (ori_id, nombre) VALUES
 (1, "opiniones"),
@@ -339,6 +351,97 @@ INSERT INTO comentarios (com_id, usu_id, foro_id, contenido, fecha, est_id) VALU
 -- USU_PRO
 INSERT INTO usu_pro (usu_pro_id, usu_id, pro_id, ori_id, origen, contenido, fecha, est_id) VALUES
 (1001, 1004, 1002, 2, 1003, "Grrr voy a tirar una bomba", NOW(), 3);
+
+
+
+-- AAA
+
+-- NUEVOS DATOS
+
+USE cinevice;
+
+-- Agregar columna genero_id a la tabla foros
+ALTER TABLE foros ADD COLUMN genero_id INT NULL AFTER descripcion;
+ALTER TABLE foros ADD FOREIGN KEY (genero_id) REFERENCES generos(gen_id);
+
+-- Agregar columna com_padre_id para sistema de respuestas
+ALTER TABLE comentarios ADD COLUMN com_padre_id INT NULL AFTER contenido;
+ALTER TABLE comentarios ADD FOREIGN KEY (com_padre_id) REFERENCES comentarios(com_id) ON DELETE CASCADE;
+
+
+-- OTROS
+
+-- ACTUALIZACIÓN DE BASE DE DATOS PARA SISTEMA DE FOROS
+-- Ejecutar estos comandos en tu base de datos cinevice
+
+USE cinevice;
+
+-- 1. Agregar columna genero_id a la tabla foros
+ALTER TABLE foros ADD COLUMN genero_id INT NULL AFTER descripcion;
+ALTER TABLE foros ADD FOREIGN KEY (genero_id) REFERENCES generos(gen_id);
+
+-- 2. Agregar columna com_padre_id para sistema de respuestas en comentarios
+ALTER TABLE comentarios ADD COLUMN com_padre_id INT NULL AFTER contenido;
+ALTER TABLE comentarios ADD FOREIGN KEY (com_padre_id) REFERENCES comentarios(com_id) ON DELETE CASCADE;
+
+-- 3. Insertar algunos foros de ejemplo
+INSERT INTO foros (usu_id, nombre, descripcion, genero_id, creacion, est_id, imagen) VALUES
+(1001, 'Terror Clásico vs Moderno', 'Debate sobre las diferencias entre el terror clásico de los 70-80 y las películas de terror contemporáneas. ¿Cuál prefieres y por qué?', 2, NOW(), 1, ''),
+(1002, 'Comedias Románticas Imprescindibles', 'Comparte tus comedias románticas favoritas y descubre nuevas joyas del género que tal vez te perdiste.', 1, NOW(), 1, ''),
+(1003, 'Análisis de Ciencia Ficción', 'Discusión profunda sobre películas de ciencia ficción, sus efectos especiales, narrativa y impacto cultural.', 4, NOW(), 1, ''),
+(1004, 'Películas de Acción Épicas', 'Todo sobre películas de acción: desde los clásicos de los 80 hasta las superproducciones actuales.', 5, NOW(), 1, ''),
+(1001, 'Cine de Fantasía y Mundos Mágicos', 'Exploremos los mejores mundos fantásticos del cine, desde El Señor de los Anillos hasta Harry Potter y más allá.', 4, NOW(), 1, '');
+
+-- 4. Insertar comentarios de ejemplo para los foros
+INSERT INTO comentarios (usu_id, foro_id, contenido, fecha, est_id) VALUES
+-- Comentarios para el foro de terror (ID 1001)
+(1003, (SELECT foro_id FROM foros WHERE nombre = 'Terror Clásico vs Moderno' LIMIT 1), 
+'Personalmente creo que el terror clásico tenía más suspenso psicológico. Películas como "El Exorcista" o "Halloween" te mantenían en tensión sin necesidad de tanto gore.', NOW(), 1),
+
+(1004, (SELECT foro_id FROM foros WHERE nombre = 'Terror Clásico vs Moderno' LIMIT 1), 
+'Estoy en desacuerdo. El terror moderno como "Hereditary" o "The Witch" ha llevado el género a otro nivel con narrativas más complejas.', NOW(), 1),
+
+-- Comentarios para el foro de comedias románticas
+(1003, (SELECT foro_id FROM foros WHERE nombre = 'Comedias Románticas Imprescindibles' LIMIT 1), 
+'Para mí, "Cuando Harry Encontró a Sally" es la mejor comedia romántica de todos los tiempos. La química entre los protagonistas es perfecta.', NOW(), 1),
+
+(1001, (SELECT foro_id FROM foros WHERE nombre = 'Comedias Románticas Imprescindibles' LIMIT 1), 
+'Yo recomiendo "El Diario de Bridget Jones", es divertidísima y muy real en sus situaciones.', NOW(), 1),
+
+-- Comentarios para el foro de ciencia ficción
+(1004, (SELECT foro_id FROM foros WHERE nombre = 'Análisis de Ciencia Ficción' LIMIT 1), 
+'Blade Runner sigue siendo una obra maestra. Su visión del futuro y las reflexiones sobre qué significa ser humano son atemporales.', NOW(), 1);
+
+-- 5. Insertar algunas respuestas a comentarios (com_padre_id)
+INSERT INTO comentarios (usu_id, foro_id, contenido, com_padre_id, fecha, est_id) VALUES
+-- Respuesta al primer comentario sobre terror
+(1001, (SELECT foro_id FROM foros WHERE nombre = 'Terror Clásico vs Moderno' LIMIT 1), 
+'Totalmente de acuerdo. John Carpenter sabía crear atmósfera sin depender de efectos especiales exagerados.', 
+(SELECT com_id FROM comentarios WHERE contenido LIKE '%El Exorcista%' LIMIT 1), NOW(), 1),
+
+-- Respuesta al comentario sobre Bridget Jones
+(1004, (SELECT foro_id FROM foros WHERE nombre = 'Comedias Románticas Imprescindibles' LIMIT 1), 
+'¡Sí! Y la secuela también está muy bien. Hugh Grant está genial en esa película.', 
+(SELECT com_id FROM comentarios WHERE contenido LIKE '%Bridget Jones%' LIMIT 1), NOW(), 1);
+
+-- 6. Verificar la estructura actualizada
+DESCRIBE foros;
+DESCRIBE comentarios;
+
+-- 7. Consulta para verificar los datos insertados
+SELECT 
+    f.nombre as foro,
+    f.descripcion,
+    g.nombre as genero,
+    u.nombre as creador,
+    COUNT(c.com_id) as total_comentarios
+FROM foros f
+LEFT JOIN generos g ON f.genero_id = g.gen_id
+LEFT JOIN usuarios u ON f.usu_id = u.usu_id
+LEFT JOIN comentarios c ON f.foro_id = c.foro_id AND c.est_id = 1
+WHERE f.est_id = 1
+GROUP BY f.foro_id
+ORDER BY f.creacion DESC;
 
 
 

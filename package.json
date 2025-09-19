@@ -1,0 +1,26 @@
+{
+  "name": "cinevice-github",
+  "version": "1.0.0",
+  "description": "**CineVice** es una plataforma web de **reseñas y puntuación de películas** con un **espacio social (foro)** para debatir, compartir opiniones y descubrir contenido nuevo.\r Actualmente el proyecto se encuentra en una **fase temprana de desarrollo**.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Camacho-Leonardo/CineVice_.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Camacho-Leonardo/CineVice_/issues"
+  },
+  "homepage": "https://github.com/Camacho-Leonardo/CineVice_#readme",
+  "devDependencies": {
+    "tailwindcss": "^4.1.13"
+  },
+  "dependencies": {
+    "@tailwindcss/cli": "^4.1.13"
+  }
+}

@@ -1,280 +1,426 @@
-<?php session_start(); ?>
+<?php 
+session_start(); 
+require_once("conexion.php");
+require_once("./Páginas/get_user_avatar.php");
+
+// Obtener películas por género
+$proximos_lanzamientos = [];
+$pelis_populares = [];
+$series_populares = [];
+
+// Próximos lanzamientos (genero_id = 6)
+$query_proximos = "SELECT p.peli_id, p.nombre, p.poster FROM pelis p 
+                   INNER JOIN pelis_generos pg ON p.peli_id = pg.peli_id 
+                   WHERE pg.gen_id = 6 AND p.est_id = 1 LIMIT 5";
+$result_proximos = mysqli_query($conexion, $query_proximos);
+while ($peli = mysqli_fetch_assoc($result_proximos)) {
+    $proximos_lanzamientos[] = $peli;
+}
+
+// Películas más populares (genero_id = 7)
+$query_populares = "SELECT p.peli_id, p.nombre, p.poster FROM pelis p 
+                    INNER JOIN pelis_generos pg ON p.peli_id = pg.peli_id 
+                    WHERE pg.gen_id = 7 AND p.est_id = 1 LIMIT 5";
+$result_populares = mysqli_query($conexion, $query_populares);
+while ($peli = mysqli_fetch_assoc($result_populares)) {
+    $pelis_populares[] = $peli;
+}
+
+// Series más populares (genero_id = 8)
+$query_series = "SELECT p.peli_id, p.nombre, p.poster FROM pelis p 
+                 INNER JOIN pelis_generos pg ON p.peli_id = pg.peli_id 
+                 WHERE pg.gen_id = 8 AND p.est_id = 1 LIMIT 5";
+$result_series = mysqli_query($conexion, $query_series);
+while ($peli = mysqli_fetch_assoc($result_series)) {
+    $series_populares[] = $peli;
+}
+?>
 
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CineVice</title>
-    <link rel="stylesheet" href="./Estilos/estilos.css">
-    <link rel="icon" type="image/x-icon" href="./Imágenes/favicon.png">
+    <link href="../../src/output.css" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="./Imágenes/C-logo.png">
+    <script>
+        // Tema oscuro/claro - inicialización
+        function initTheme() {
+            if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        }
+        initTheme();
+    </script>
 </head>
 
-<body>
-    <header>
-        <div class="title-container">
-            <div class="title">
-                <a href="./index.php" id="home-link">
-                    <h1>Cine<strong id="colored-h1">Vice</strong></h1>
-                </a>
+<body class="bg-gradient-to-br from-pink-100 via-purple-50 to-blue-100 dark:from-gray-900 dark:via-purple-900 dark:to-blue-900 min-h-screen transition-all duration-300">
+    <!-- Navbar -->
+    <header class="sticky top-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg border-b border-pink-200 dark:border-purple-700 shadow-lg">
+        <div class="container mx-auto px-4 py-3">
+            <div class="flex items-center justify-between">
+                <!-- Logo -->
+                <div class="flex items-center space-x-4">
+                    <a href="./index.php" class="group">
+                        <h1 class="text-3xl font-black bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 bg-clip-text text-transparent hover:scale-105 transition-transform duration-300">
+                            CINE<span class="text-blue-400">VICE</span>
+                        </h1>
+                    </a>
+                    
+                    <!-- Navigation Links -->
+                    <nav class="hidden md:flex space-x-6">
+                        <a href="./peliculas_series.php" class="text-gray-700 dark:text-gray-300 hover:text-pink-500 dark:hover:text-pink-400 transition-colors duration-200 font-medium">
+                            Películas/Series
+                        </a>
+                        <a href="./foros.php" class="text-gray-700 dark:text-gray-300 hover:text-purple-500 dark:hover:text-purple-400 transition-colors duration-200 font-medium">
+                            Foros
+                        </a>
+                    </nav>
+                </div>
+
+                <!-- Right Section -->
+                <div class="flex items-center space-x-4">
+                    <!-- Theme Toggle -->
+                    <button id="theme-toggle" class="p-2 rounded-full bg-gradient-to-r from-yellow-400 to-orange-500 dark:from-purple-600 dark:to-blue-600 text-white hover:shadow-lg transition-all duration-200">
+                        <svg id="sun-icon" class="w-5 h-5 dark:hidden" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd"></path>
+                        </svg>
+                        <svg id="moon-icon" class="w-5 h-5 hidden dark:block" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
+                        </svg>
+                    </button>
+
+                    <!-- User Section -->
+                    <?php if (isset($_SESSION['usuario'])): ?>
+                        <?php 
+                        $user_avatar = getUserAvatar($_SESSION['usuario']['id'], $conexion);
+                        ?>
+                        <div class="flex items-center space-x-3">
+                            <img src="<?php echo $user_avatar; ?>" alt="Avatar" class="w-8 h-8 rounded-full border-2 border-pink-300 dark:border-purple-400">
+                            <a href="./Páginas/perfil.php" class="text-gray-700 dark:text-gray-300 hover:text-pink-500 dark:hover:text-pink-400 font-medium transition-colors duration-200">
+                                <?php echo htmlspecialchars($_SESSION['usuario']['nombre']); ?>
+                            </a>
+                            <a href="./Páginas/logout.php" class="px-4 py-2 bg-gradient-to-r from-red-500 to-pink-500 text-white rounded-lg hover:from-red-600 hover:to-pink-600 transition-all duration-200 font-medium">
+                                Cerrar sesión
+                            </a>
+                        </div>
+                    <?php else: ?>
+                        <div class="flex space-x-3">
+                            <a href="./Páginas/formularios.php?inicio" class="px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-lg hover:from-blue-600 hover:to-purple-600 transition-all duration-200 font-medium">
+                                Iniciar sesión
+                            </a>
+                            <a href="./Páginas/formularios.php?registro" class="px-4 py-2 bg-gradient-to-r from-pink-500 to-purple-500 text-white rounded-lg hover:from-pink-600 hover:to-purple-600 transition-all duration-200 font-medium">
+                                Registrarse
+                            </a>
+                        </div>
+                    <?php endif; ?>
+                </div>
             </div>
         </div>
-
-        <div class="nav-bar-container">
-            <nav class="nav-bar">
-                <ul>
-                    <li><a href="./peliculas_series.php">Películas/Series</a></li>
-                    <li><a href="./foros.php">Foros</a></li> 
-                    
-                </ul>
-            </nav>
-        </div>
-
-<div class="logs-container">
-    <div class="logs">
-        <?php if (isset($_SESSION['usuario'])): ?>
-            <span class="nav-username">👤 <?php echo htmlspecialchars($_SESSION['usuario']['nombre']); ?></span>
-            <a href="./Páginas/perfil.php"><button>Perfil</button></a>
-            <a href="./Páginas/logout.php"><button class="log-out">Cerrar sesión</button></a>
-        <?php else: ?>
-            <a href="./Páginas/formularios.php?inicio"><button class="log-in">Iniciar sesión</button></a>
-            <a href="./Páginas/formularios.php?registro"><button class="sing-in">Registrarse</button></a>
-        <?php endif; ?>
-    </div>
-</div>
     </header>
 
-    <main>
-        <section>
-            <div class="carousel-container">
-                <div class="carousel" id="carousel">
-                    <div class="slide active">
-                        <div class="slide-info">
-                            <div class="slide-info-img-container"><img src="./Imágenes/Carrousel/stitch_titulo.png" alt="stitch titulo" style="position: relative; right: 30px;"></div>
-                            <p>Una solitaria niña hawaiana se hace amiga de un extraterrestre fugitivo y ayuda a sanar a su fragmentada familia.</p>
-                            <!-- 7,0/10 -->
+    <!-- Main Content -->
+    <main class="flex-1">
+        <!-- Carousel Section -->
+        <section class="py-8">
+            <div class="container mx-auto px-4">
+                <div class="max-w-5xl mx-auto relative bg-white/20 dark:bg-gray-800/20 backdrop-blur-sm rounded-3xl overflow-hidden shadow-2xl">
+                    <div class="carousel" id="carousel">
+                        <div class="slide active relative h-96 md:h-[500px]">
+                            <div class="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent z-10"></div>
+                            <div class="slide-info absolute left-8 top-1/2 transform -translate-y-1/2 z-20 text-white max-w-md">
+                                <div class="slide-info-img-container mb-4">
+                                    <img src="./Imágenes/Carrousel/stitch_titulo.png" alt="stitch titulo" class="max-w-xs">
+                                </div>
+                                <p class="text-lg leading-relaxed">Una solitaria niña hawaiana se hace amiga de un extraterrestre fugitivo y ayuda a sanar a su fragmentada familia.</p>
+                            </div>
+                            <img src="./Imágenes/Carrousel/stitch_carrousel.webp" alt="Pelicula 1" class="w-full h-full object-cover">
                         </div>
 
-                        <img src="./Imágenes/Carrousel/stitch_carrousel.webp" alt="Pelicula 1">
-                    </div>
-
-                    <div class="slide">
-                        <div class="slide-info">
-                            <div class="slide-info-img-container"><img src="./Imágenes/Carrousel/minecraft_titulo.png" alt="minecraft titulo" style="position: relative; left: 60px;"></div>
-                            <p style="position: relative; bottom: 80px;">El malvado dragón de Ender está en su camino a la destrucción, haciendo que una chica joven y su grupo de aventureros amigos intenten salvar Overworld.</p>
-                            <!-- 5,7/10 -->
+                        <div class="slide relative h-96 md:h-[500px]">
+                            <div class="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent z-10"></div>
+                            <div class="slide-info absolute left-8 top-1/2 transform -translate-y-1/2 z-20 text-white max-w-md">
+                                <div class="slide-info-img-container mb-4">
+                                    <img src="./Imágenes/Carrousel/minecraft_titulo.png" alt="minecraft titulo" class="max-w-xs">
+                                </div>
+                                <p class="text-lg leading-relaxed">El malvado dragón de Ender está en su camino a la destrucción, haciendo que una chica joven y su grupo de aventureros amigos intenten salvar Overworld.</p>
+                            </div>
+                            <img src="./Imágenes/Carrousel/minecraft_carrousel.webp" alt="Pelicula 2" class="w-full h-full object-cover">
                         </div>
 
-                        <img src="./Imágenes/Carrousel/minecraft_carrousel.webp" alt="Pelicula 2">
-                    </div>
-
-                    <div class="slide">
-                        <div class="slide-info">
-                            <div class="slide-info-img-container"><img src="./Imágenes/Carrousel/eleternauta_titulo.png" alt="eternauta titulo" style="position: relative; right: 50px;"></div>
-                            <p style="position: relative; bottom: 120px;">Sigue a Juan Salvo junto con un grupo de supervivientes mientras luchan contra una amenaza alienígena que se encuentra bajo la dirección de una fuerza invisible después de que una terrible nevada se cobra la vida de millones de personas.</p>
-                            <!-- 7,4/10 -->
+                        <div class="slide relative h-96 md:h-[500px]">
+                            <div class="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent z-10"></div>
+                            <div class="slide-info absolute left-8 top-1/2 transform -translate-y-1/2 z-20 text-white max-w-md">
+                                <div class="slide-info-img-container mb-4">
+                                    <img src="./Imágenes/Carrousel/eleternauta_titulo.png" alt="eternauta titulo" class="max-w-xs">
+                                </div>
+                                <p class="text-lg leading-relaxed">Sigue a Juan Salvo junto con un grupo de supervivientes mientras luchan contra una amenaza alienígena.</p>
+                            </div>
+                            <img src="./Imágenes/Carrousel/eternauta_carrousel.webp" alt="Pelicula 3" class="w-full h-full object-cover">
                         </div>
 
-                        <img src="./Imágenes/Carrousel/eternauta_carrousel.webp" alt="Pelicula 3">
-                    </div>
-
-                    <div class="slide">
-                        <div class="slide-info">
-                            <div class="slide-info-img-container"><img src="./Imágenes/Carrousel/thelastofus_titulo.png" alt="the last of us titulo" style="position: relative; right: 180px;"></div>
-                            <p style="position: relative; bottom: 20px;">Joel y Ellie, una pareja conectada a través de la dureza del mundo en el que viven, se ven obligados a soportar circunstancias brutales y asesinos despiadados en un viaje por la América posterior a una pandemia.</p>
-                            <!-- 8,6/10 -->
+                        <div class="slide relative h-96 md:h-[500px]">
+                            <div class="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent z-10"></div>
+                            <div class="slide-info absolute left-8 top-1/2 transform -translate-y-1/2 z-20 text-white max-w-md">
+                                <div class="slide-info-img-container mb-4">
+                                    <img src="./Imágenes/Carrousel/thelastofus_titulo.png" alt="the last of us titulo" class="max-w-xs">
+                                </div>
+                                <p class="text-lg leading-relaxed">Joel y Ellie, una pareja conectada a través de la dureza del mundo en el que viven.</p>
+                            </div>
+                            <img src="./Imágenes/Carrousel/thelasofus_carrousel.webp" alt="Pelicula 4" class="w-full h-full object-cover">
                         </div>
 
-                        <img src="./Imágenes/Carrousel/thelasofus_carrousel.webp" alt="Pelicula 4">
-                    </div>
-
-                    <div class="slide">
-                        <div class="slide-info">
-                            <div class="slide-info-img-container"><img src="./Imágenes/Carrousel/misionimposible_titulo.png" alt="mision imposible titulo" style="position: relative; left: 50px;"></div>
-                            <p style="position: relative; bottom: 70px;">Ethan y su equipo tienen la misión de encontrar y destruir a una IA conocida como La Entidad. El viaje por todo el mundo da lugar a increíbles escenas de acción y a más de un giro inesperado.</p>
-                            <!-- 7,5/10 -->
+                        <div class="slide relative h-96 md:h-[500px]">
+                            <div class="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent z-10"></div>
+                            <div class="slide-info absolute left-8 top-1/2 transform -translate-y-1/2 z-20 text-white max-w-md">
+                                <div class="slide-info-img-container mb-4">
+                                    <img src="./Imágenes/Carrousel/misionimposible_titulo.png" alt="mision imposible titulo" class="max-w-xs">
+                                </div>
+                                <p class="text-lg leading-relaxed">Ethan y su equipo tienen la misión de encontrar y destruir a una IA conocida como La Entidad.</p>
+                            </div>
+                            <img src="./Imágenes/Carrousel/misionimposible_carrousel.webp" alt="Pelicula 5" class="w-full h-full object-cover">
                         </div>
-
-                        <img src="./Imágenes/Carrousel/misionimposible_carrousel.webp" alt="Pelicula 5">
                     </div>
-                </div>
 
-                <button class="nav prev" onclick="prevSlide()"><img src="./Imágenes/flecha-izquierda-carrusel.png" alt="left-arrow"></button>
-                <button class="nav next" onclick="nextSlide()"><img src="./Imágenes/flecha-derecha-carrusel.png" alt="right-arrow"></button>
+                    <!-- Navigation Buttons -->
+                    <button class="nav prev absolute left-4 top-1/2 transform -translate-y-1/2 z-30 bg-white/20 hover:bg-white/40 backdrop-blur-sm rounded-full p-3 transition-all duration-200" onclick="prevSlide()">
+                        <img src="./Imágenes/flecha-izquierda-carrusel.png" alt="left-arrow" class="w-6 h-6">
+                    </button>
+                    <button class="nav next absolute right-4 top-1/2 transform -translate-y-1/2 z-30 bg-white/20 hover:bg-white/40 backdrop-blur-sm rounded-full p-3 transition-all duration-200" onclick="nextSlide()">
+                        <img src="./Imágenes/flecha-derecha-carrusel.png" alt="right-arrow" class="w-6 h-6">
+                    </button>
 
-                <div class="indicators" id="indicators"></div>
-            </div>
-        </section>
-
-        <section class="seccion" id="seccion-color">
-            <h2>Próximos lanzamientos</h2>
-
-            <div class="pelis-container">
-                <div class="pelis">
-                    <a href="./Páginas/pelicula.php"><img src="./Imágenes/Posters/comoentrenaratudragon.jpg" alt="Cómo entrenar a tu dragón"></a>
-                    <p>Cómo entrenar a tu dragón</p>
-                    <p><strong>Lanzamiento: 12 jun 2025</strong></p>
-                </div>
-
-                <div class="pelis">
-                    <a href="./Páginas/pelicula.php"><img src="./Imágenes/Posters/fueradetemporada.jpg" alt="Fuera de temporada"></a>
-                    <p>Fuera de temporada</p>
-                    <p><strong>Lanzamiento: 12 jun 2025</strong></p>
-                </div>
-
-                <div class="pelis">
-                    <a href="./Páginas/pelicula.php"><img src="./Imágenes/Posters/gatillero.jpg" alt="Gatillero"></a>
-                    <p>Gatillero</p>
-                    <p><strong>Lanzamiento: 12 jun 2025</strong></p>
-                </div>
-
-                <div class="pelis">
-                    <a href="./Páginas/pelicula.php"><img src="./Imágenes/Posters/superman.jpg" alt="Superman"></a>
-                    <p>Superman</p>
-                    <p><strong>Lanzamiento: 10 jul 2025</strong></p>
-                </div>
-
-                <div class="pelis">
-                    <a href="./Páginas/pelicula.php"><img src="./Imágenes/Posters/fantasticfour.jpg" alt="Los 4 Fantásticos: Primeros pasos"></a>
-                    <p>Los 4 Fantásticos: Primeros pasos</p>
-                    <p><strong>Lanzamiento: 24 jul 2025</strong></p>
-                </div>
-
-            </div>
-        </section>
-
-        <section class="seccion">
-            <h2>Películas más populares</h2>
-
-            <div class="pelis-container">
-                <div class="pelis">
-                    <a href="./Páginas/pelicula.php"><img src="./Imágenes/Posters/lospecadores.jpg" alt="Los pecadores"></a>
-                    <p>Los pecadores</p>
-                    <!-- rating: 7,9/10 -->
-                    <!-- Tratando de descubrir sus problemáticas vidas detrás, los hermanos gemelos regresan a su ciudad natal para comenzar de nuevo, solo para descubrir que un mal aún mayor los espera para darles la bienvenida nuevamente. -->
-                </div>
-
-                <div class="pelis">
-                    <a href="./Páginas/pelicula.php"><img src="./Imágenes/Posters/fuentedelajuventud.jpg" alt="La fuente de la eterna juventud"></a>
-                    <p>La fuente de la eterna juventud</p>
-                    <!-- rating: 5,7/10 -->
-                    <!-- Dos hermanos unen sus fuerzas para buscar la legendaria fuente de la juventud. Utilizando pistas históricas, se embarcan en una búsqueda épica llena de aventuras. Si tienen éxito, la mítica fuente podría concederles la inmortalidad. -->
-                </div>
-
-                <div class="pelis">
-                    <a href="./Páginas/pelicula.php"><img src="./Imágenes/Posters/capitanamerica.jpg" alt="Capitán América: Brave New World"></a>
-                    <p>Capitán América: Brave New World</p>
-                    <!-- rating: 5,7/10 -->
-                    <!-- ???  -->
-                </div>
-
-                <div class="pelis">
-                    <a href="./Páginas/pelicula.php"><img src="./Imágenes/Posters/destinofinal.jpg" alt="Destino final: Lazos de sangre"></a>
-                    <p>Destino final: Lazos de sangre</p>
-                    <!-- rating: 7,0/10 -->
-                    <!-- Atormentada por una pesadilla violenta recurrente, una estudiante universitaria regresa a casa para encontrar a la única persona que puede romper el ciclo y salvar a su familia del horrible destino que inevitablemente les espera. -->
-                </div>
-
-                <div class="pelis">
-                    <a href="./Páginas/pelicula.php"><img src="./Imágenes/Posters/karatekid.jpg" alt="Karate Kid: Legends"></a>
-                    <p>Karate Kid: Legends</p>
-                    <!-- rating: 6,6/10 -->
-                    <!-- Daniel llega a Beijing, donde el Sr. Han lo ha estado buscando. Han tiene un nuevo protegido, Li Fong. Los dos mentores deben colaborar para instruir a Li Fong, pero queda por ver si sus enfoques educativos serán compatibles. -->
-                </div>
-
-            </div>
-        </section>
-
-        <section class="seccion" id="seccion-color-alt">
-            <h2>Series más populares</h2>
-
-            <div class="pelis-container">
-                <div class="pelis">
-                    <a href="./Páginas/pelicula.php"><img src="./Imágenes/Posters/thelastofus.jpg" alt="The Last of Us"></a>
-                    <p>The Last of Us</p>
-                    <!-- rating: 8,6/10 -->
-                    <!-- Joel y Ellie, una pareja conectada a través de la dureza del mundo en el que viven, se ven obligados a soportar circunstancias brutales y asesinos despiadados en un viaje por la América posterior a una pandemia. -->
-                </div>
-
-                <div class="pelis">
-                    <a href="./Páginas/pelicula.php"><img src="./Imágenes/Posters/dept.q.jpg" alt="Department Q"></a>
-                    <p>Department Q</p>
-                    <!-- rating: 8,3/10 -->
-                    <!-- Carl, un antiguo detective de primera que se siente atormentado por la culpa tras un ataque que dejó a su compañero paralítico y a otro policía muerto. A su vuelta al trabajo, Carl es asignado a un caso sin resolver que consumirá su vida. -->
-                </div>
-
-                <div class="pelis">
-                    <a href="./Páginas/pelicula.php"><img src="./Imágenes/Posters/sirenas.jpg" alt="Sirenas"></a>
-                    <p>Sirenas</p>
-                    <!-- rating: 6,8/10 -->
-                    <!--Devon está preocupada por la relación enfermiza de su hermana con su nuevo jefe. -->
-                </div>
-
-                <div class="pelis">
-                    <a href="./Páginas/pelicula.php"><img src="./Imágenes/Posters/mobland.jpg" alt="MobLand"></a>
-                    <p>MobLand</p>
-                    <!-- rating: 8,5/10 -->
-                    <!--Muestra a dos generaciones de gángsters, sus negocios, las relaciones que tejen y el hombre al que llaman para arreglar sus problemas.  -->
-                </div>
-
-                <div class="pelis">
-                    <a href="./Páginas/pelicula.php"><img src="./Imágenes/Posters/andor.jpg" alt="Andor"></a>
-                    <p>Andor</p>
-                    <!-- rating: 8,5/10 -->
-                    <!-- Precuela de "Rogue One: Una historia de Star Wars" que sigue las aventuras de Cassian Andor durante sus años de formación con La Rebelión. -->
+                    <!-- Indicators -->
+                    <div class="indicators absolute bottom-4 left-1/2 transform -translate-x-1/2 z-30 flex space-x-2" id="indicators"></div>
                 </div>
             </div>
         </section>
 
+        <!-- Próximos lanzamientos -->
+        <section class="py-12 bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-900/20 dark:to-purple-900/20">
+            <div class="container mx-auto px-4">
+                <h2 class="text-4xl font-bold text-center mb-12 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                    Próximos lanzamientos
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-8">
+                    <?php foreach ($proximos_lanzamientos as $peli): ?>
+                        <div class="group cursor-pointer">
+                            <a href="en_desarrollo.php?peli_id=<?php echo $peli['peli_id']; ?>" class="block">
+                                <div class="relative overflow-hidden rounded-2xl shadow-lg group-hover:shadow-2xl transition-all duration-300 transform group-hover:scale-105">
+                                    <img src="./Imágenes/Posters/<?php echo $peli['poster']; ?>" alt="<?php echo $peli['nombre']; ?>" class="w-full h-80 object-cover" onerror="this.src='./Imágenes/default-poster.jpg'">
+                                    <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                    <div class="absolute bottom-4 left-4 right-4 text-white transform translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+                                        <h3 class="font-bold text-lg"><?php echo $peli['nombre']; ?></h3>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+        </section>
+
+        <!-- Películas más populares -->
+        <section class="py-12 bg-gradient-to-r from-pink-100 to-red-100 dark:from-pink-900/20 dark:to-red-900/20">
+            <div class="container mx-auto px-4">
+                <h2 class="text-4xl font-bold text-center mb-12 bg-gradient-to-r from-pink-600 to-red-600 bg-clip-text text-transparent">
+                    Películas más populares
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-8">
+                    <?php foreach ($pelis_populares as $peli): ?>
+                        <div class="group cursor-pointer">
+                            <a href="en_desarrollo.php?peli_id=<?php echo $peli['peli_id']; ?>" class="block">
+                                <div class="relative overflow-hidden rounded-2xl shadow-lg group-hover:shadow-2xl transition-all duration-300 transform group-hover:scale-105">
+                                    <img src="./Imágenes/Posters/<?php echo $peli['poster']; ?>" alt="<?php echo $peli['nombre']; ?>" class="w-full h-80 object-cover" onerror="this.src='./Imágenes/default-poster.jpg'">
+                                    <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                    <div class="absolute bottom-4 left-4 right-4 text-white transform translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+                                        <h3 class="font-bold text-lg"><?php echo $peli['nombre']; ?></h3>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+        </section>
+
+        <!-- Series más populares -->
+        <section class="py-12 bg-gradient-to-r from-purple-100 to-indigo-100 dark:from-purple-900/20 dark:to-indigo-900/20">
+            <div class="container mx-auto px-4">
+                <h2 class="text-4xl font-bold text-center mb-12 bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
+                    Series más populares
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-8">
+                    <?php foreach ($series_populares as $peli): ?>
+                        <div class="group cursor-pointer">
+                            <a href="en_desarrollo.php?peli_id=<?php echo $peli['peli_id']; ?>" class="block">
+                                <div class="relative overflow-hidden rounded-2xl shadow-lg group-hover:shadow-2xl transition-all duration-300 transform group-hover:scale-105">
+                                    <img src="./Imágenes/Posters/<?php echo $peli['poster']; ?>" alt="<?php echo $peli['nombre']; ?>" class="w-full h-80 object-cover" onerror="this.src='./Imágenes/default-poster.jpg'">
+                                    <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                    <div class="absolute bottom-4 left-4 right-4 text-white transform translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+                                        <h3 class="font-bold text-lg"><?php echo $peli['nombre']; ?></h3>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+        </section>
     </main>
 
-    <footer>
-        <p>&copy; 2025 CineVice</p>
+    <!-- Footer -->
+    <footer class="bg-gradient-to-r from-gray-900 via-purple-900 to-blue-900 text-white py-12 mt-16">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Logo y descripción -->
+                <div>
+                    <h3 class="text-2xl font-bold bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text text-transparent mb-4">
+                        CINE<span class="text-blue-400">VICE</span>
+                    </h3>
+                    <p class="text-gray-300">Tu plataforma favorita para descubrir y opinar sobre películas y series.</p>
+                </div>
+
+                <!-- Contacto -->
+                <div>
+                    <h4 class="text-lg font-semibold mb-4 text-pink-400">Contacto</h4>
+                    <div class="space-y-3">
+                        <a href="mailto:cinevice.suport@gmail.com" class="flex items-center space-x-2 text-gray-300 hover:text-pink-400 transition-colors duration-200">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"></path>
+                                <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"></path>
+                            </svg>
+                            <span>cinevice.suport@gmail.com</span>
+                        </a>
+                        <a href="https://www.facebook.com/profile.php?id=61581046115329" target="_blank" class="flex items-center space-x-2 text-gray-300 hover:text-blue-400 transition-colors duration-200">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                            </svg>
+                            <span>Facebook</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Enlaces útiles -->
+                <div>
+                    <h4 class="text-lg font-semibold mb-4 text-purple-400">Enlaces</h4>
+                    <div class="space-y-2">
+                        <a href="./peliculas_series.php" class="block text-gray-300 hover:text-purple-400 transition-colors duration-200">Películas/Series</a>
+                        <a href="./foros.php" class="block text-gray-300 hover:text-purple-400 transition-colors duration-200">Foros</a>
+                        <?php if (isset($_SESSION['usuario'])): ?>
+                            <a href="./Páginas/perfil.php" class="block text-gray-300 hover:text-purple-400 transition-colors duration-200">Mi Perfil</a>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </div>
+
+            <div class="border-t border-gray-700 mt-8 pt-8 text-center">
+                <p class="text-gray-400">&copy; 2025 CineVice. Todos los derechos reservados.</p>
+            </div>
+        </div>
     </footer>
 
     <script>
-        let currentSlide = 0;
-        const slides = document.querySelectorAll('.slide');
-        const indicatorsContainer = document.getElementById('indicators');
+        // Theme Toggle - Mejorado
+        document.addEventListener('DOMContentLoaded', function() {
+            const themeToggle = document.getElementById('theme-toggle');
+            const sunIcon = document.getElementById('sun-icon');
+            const moonIcon = document.getElementById('moon-icon');
 
-        function showSlide(index) {
-            slides.forEach((slide, i) => {
-                slide.classList.remove('active');
-                indicatorsContainer.children[i].classList.remove('active');
+            // Función para actualizar los iconos
+            function updateIcons() {
+                if (document.documentElement.classList.contains('dark')) {
+                    sunIcon.style.display = 'none';
+                    moonIcon.style.display = 'block';
+                } else {
+                    sunIcon.style.display = 'block';
+                    moonIcon.style.display = 'none';
+                }
+            }
+
+            // Inicializar iconos
+            updateIcons();
+
+            // Event listener para el botón
+            themeToggle.addEventListener('click', function() {
+                if (document.documentElement.classList.contains('dark')) {
+                    document.documentElement.classList.remove('dark');
+                    localStorage.theme = 'light';
+                } else {
+                    document.documentElement.classList.add('dark');
+                    localStorage.theme = 'dark';
+                }
+                updateIcons();
             });
 
-            slides[index].classList.add('active');
-            indicatorsContainer.children[index].classList.add('active');
-        }
+            // Carousel functionality
+            let currentSlide = 0;
+            const slides = document.querySelectorAll('.slide');
+            const indicatorsContainer = document.getElementById('indicators');
 
-        function nextSlide() {
-            currentSlide = (currentSlide + 1) % slides.length;
-            showSlide(currentSlide);
-        }
-
-        function prevSlide() {
-            currentSlide = (currentSlide - 1 + slides.length) % slides.length;
-            showSlide(currentSlide);
-        }
-
-        function createIndicators() {
-            slides.forEach((_, index) => {
-                const dot = document.createElement('button');
-                dot.addEventListener('click', () => {
-                    currentSlide = index;
-                    showSlide(currentSlide);
+            function showSlide(index) {
+                slides.forEach((slide, i) => {
+                    slide.classList.remove('active');
+                    if (indicatorsContainer.children[i]) {
+                        indicatorsContainer.children[i].classList.remove('active');
+                    }
                 });
-                if (index === 0) dot.classList.add('active');
-                indicatorsContainer.appendChild(dot);
-            });
-        }
 
-        createIndicators();
-        showSlide(currentSlide);
+                slides[index].classList.add('active');
+                if (indicatorsContainer.children[index]) {
+                    indicatorsContainer.children[index].classList.add('active');
+                }
+            }
 
-        setInterval(nextSlide, 8000);
+            window.nextSlide = function() {
+                currentSlide = (currentSlide + 1) % slides.length;
+                showSlide(currentSlide);
+            }
+
+            window.prevSlide = function() {
+                currentSlide = (currentSlide - 1 + slides.length) % slides.length;
+                showSlide(currentSlide);
+            }
+
+            function createIndicators() {
+                slides.forEach((_, index) => {
+                    const dot = document.createElement('button');
+                    dot.className = 'w-3 h-3 rounded-full bg-white/50 hover:bg-white/80 transition-all duration-200';
+                    dot.addEventListener('click', () => {
+                        currentSlide = index;
+                        showSlide(currentSlide);
+                    });
+                    if (index === 0) {
+                        dot.classList.add('active', 'bg-white');
+                    }
+                    indicatorsContainer.appendChild(dot);
+                });
+            }
+
+            // Add CSS for active indicator and slides
+            const style = document.createElement('style');
+            style.textContent = `
+                .indicators button.active {
+                    background-color: white !important;
+                }
+                .slide {
+                    display: none;
+                }
+                .slide.active {
+                    display: block;
+                }
+            `;
+            document.head.appendChild(style);
+
+            createIndicators();
+            showSlide(currentSlide);
+
+            // Auto-advance carousel
+            setInterval(window.nextSlide, 8000);
+        });
     </script>
 </body>
-
 </html>
