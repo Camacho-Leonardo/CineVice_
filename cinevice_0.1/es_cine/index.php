@@ -44,17 +44,6 @@ while ($peli = mysqli_fetch_assoc($result_series)) {
     <title>CineVice</title>
     <link href="../../src/output.css" rel="stylesheet">
     <link rel="icon" type="image/x-icon" href="./Imágenes/C-logo.png">
-    <script>
-        // Tema oscuro/claro - inicialización
-        function initTheme() {
-            if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-                document.documentElement.classList.add('dark');
-            } else {
-                document.documentElement.classList.remove('dark');
-            }
-        }
-        initTheme();
-    </script>
 </head>
 
 <body class="bg-gradient-to-br from-pink-100 via-purple-50 to-blue-100 dark:from-gray-900 dark:via-purple-900 dark:to-blue-900 min-h-screen transition-all duration-300">
@@ -84,13 +73,11 @@ while ($peli = mysqli_fetch_assoc($result_series)) {
                 <!-- Right Section -->
                 <div class="flex items-center space-x-4">
                     <!-- Theme Toggle -->
-                    <button id="theme-toggle" class="p-2 rounded-full bg-gradient-to-r from-yellow-400 to-orange-500 dark:from-purple-600 dark:to-blue-600 text-white hover:shadow-lg transition-all duration-200">
-                        <svg id="sun-icon" class="w-5 h-5 dark:hidden" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd"></path>
-                        </svg>
-                        <svg id="moon-icon" class="w-5 h-5 hidden dark:block" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
-                        </svg>
+                    <button id="themeToggle" class="p-3 rounded-lg transition-colors duration-200 hover:bg-gray-200 dark:hover:bg-gray-700 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700">
+                        <!-- Sol para modo claro (mostrar cuando está en tema oscuro) -->
+                        <span class="text-2xl hidden dark:block">☀️</span>
+                        <!-- Luna para modo oscuro (mostrar cuando está en tema claro) -->
+                        <span class="text-2xl block dark:hidden">🌙</span>
                     </button>
 
                     <!-- User Section -->
@@ -324,37 +311,134 @@ while ($peli = mysqli_fetch_assoc($result_series)) {
     </footer>
 
     <script>
-        // Theme Toggle - Mejorado
         document.addEventListener('DOMContentLoaded', function() {
-            const themeToggle = document.getElementById('theme-toggle');
-            const sunIcon = document.getElementById('sun-icon');
-            const moonIcon = document.getElementById('moon-icon');
+            // Theme Toggle - Copiado exactamente de perfil.php
+            const themeToggle = document.getElementById('themeToggle');
+            const body = document.body;
+            const navbar = document.querySelector('header');
+            
+            // Elementos principales que necesitan cambiar de tema
+            const mainSections = document.querySelectorAll('section');
+            const footer = document.querySelector('footer');
 
-            // Función para actualizar los iconos
-            function updateIcons() {
-                if (document.documentElement.classList.contains('dark')) {
-                    sunIcon.style.display = 'none';
-                    moonIcon.style.display = 'block';
-                } else {
-                    sunIcon.style.display = 'block';
-                    moonIcon.style.display = 'none';
-                }
+            // Check for saved theme preference
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            if (savedTheme === 'dark') {
+                enableDarkMode();
+            } else {
+                enableLightMode();
             }
 
-            // Inicializar iconos
-            updateIcons();
-
-            // Event listener para el botón
-            themeToggle.addEventListener('click', function() {
-                if (document.documentElement.classList.contains('dark')) {
-                    document.documentElement.classList.remove('dark');
-                    localStorage.theme = 'light';
+            themeToggle.addEventListener('click', () => {
+                if (body.classList.contains('dark')) {
+                    enableLightMode();
+                    localStorage.setItem('theme', 'light');
                 } else {
-                    document.documentElement.classList.add('dark');
-                    localStorage.theme = 'dark';
+                    enableDarkMode();
+                    localStorage.setItem('theme', 'dark');
                 }
-                updateIcons();
             });
+
+            function enableDarkMode() {
+                // Body
+                body.className = 'bg-gray-900 text-white min-h-screen transition-all duration-300 dark';
+                
+                // Navbar
+                if (navbar) {
+                    navbar.className = 'sticky top-0 z-50 bg-gray-800 backdrop-blur-lg border-b border-gray-700 shadow-lg text-white';
+                    
+                    // Hacer visibles los enlaces de navegación en tema oscuro
+                    const navLinks = navbar.querySelectorAll('nav a');
+                    navLinks.forEach(link => {
+                        link.className = 'text-gray-300 hover:text-pink-400 transition-colors duration-200 font-medium';
+                    });
+                    
+                    // Actualizar botón de tema para que se vea mejor
+                    const themeBtn = navbar.querySelector('#themeToggle');
+                    if (themeBtn) {
+                        themeBtn.className = 'p-2 rounded-lg transition-colors duration-200 hover:bg-gray-700 border border-gray-600 bg-gray-700';
+                    }
+                }
+                
+                // Secciones principales
+                mainSections.forEach(section => {
+                    if (section.classList.contains('py-12')) {
+                        // Secciones de películas
+                        section.className = section.className.replace(/from-\w+-\d+/g, 'from-gray-800')
+                                                           .replace(/to-\w+-\d+/g, 'to-gray-700')
+                                                           .replace(/dark:from-\w+-\d+\/\d+/g, '')
+                                                           .replace(/dark:to-\w+-\d+\/\d+/g, '');
+                    }
+                });
+
+                // Footer mantiene su estilo
+                if (footer) {
+                    footer.className = 'bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 text-white py-12 mt-16';
+                }
+
+                // Títulos de secciones
+                const titles = document.querySelectorAll('h2');
+                titles.forEach(title => {
+                    if (title.classList.contains('bg-gradient-to-r')) {
+                        title.className = 'text-4xl font-bold text-center mb-12 text-white';
+                    }
+                });
+            }
+
+            function enableLightMode() {
+                // Body  
+                body.className = 'bg-gradient-to-br from-pink-100 via-purple-50 to-blue-100 min-h-screen transition-all duration-300';
+                
+                // Navbar
+                if (navbar) {
+                    navbar.className = 'sticky top-0 z-50 bg-white/80 backdrop-blur-lg border-b border-pink-200 shadow-lg';
+                    
+                    // Restaurar enlaces de navegación en tema claro
+                    const navLinks = navbar.querySelectorAll('nav a');
+                    navLinks.forEach(link => {
+                        if (link.textContent.includes('Películas/Series')) {
+                            link.className = 'text-gray-700 hover:text-pink-500 transition-colors duration-200 font-medium';
+                        } else if (link.textContent.includes('Foros')) {
+                            link.className = 'text-gray-700 hover:text-purple-500 transition-colors duration-200 font-medium';
+                        }
+                    });
+                    
+                    // Restaurar botón de tema
+                    const themeBtn = navbar.querySelector('#themeToggle');
+                    if (themeBtn) {
+                        themeBtn.className = 'p-2 rounded-lg transition-colors duration-200 hover:bg-gray-200 border border-gray-300 bg-white';
+                    }
+                }
+
+                // Restaurar secciones originales
+                const sections = document.querySelectorAll('section');
+                sections.forEach((section, index) => {
+                    if (index === 1) { // Próximos lanzamientos
+                        section.className = 'py-12 bg-gradient-to-r from-blue-100 to-purple-100';
+                    } else if (index === 2) { // Películas populares
+                        section.className = 'py-12 bg-gradient-to-r from-pink-100 to-red-100';
+                    } else if (index === 3) { // Series populares
+                        section.className = 'py-12 bg-gradient-to-r from-purple-100 to-indigo-100';
+                    }
+                });
+
+                // Footer
+                if (footer) {
+                    footer.className = 'bg-gradient-to-r from-gray-900 via-purple-900 to-blue-900 text-white py-12 mt-16';
+                }
+
+                // Restaurar títulos originales
+                const titles = document.querySelectorAll('h2');
+                titles.forEach((title, index) => {
+                    if (index === 0) { // Próximos lanzamientos
+                        title.className = 'text-4xl font-bold text-center mb-12 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent';
+                    } else if (index === 1) { // Películas populares
+                        title.className = 'text-4xl font-bold text-center mb-12 bg-gradient-to-r from-pink-600 to-red-600 bg-clip-text text-transparent';
+                    } else if (index === 2) { // Series populares
+                        title.className = 'text-4xl font-bold text-center mb-12 bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent';
+                    }
+                });
+            }
 
             // Carousel functionality
             let currentSlide = 0;
@@ -369,12 +453,15 @@ while ($peli = mysqli_fetch_assoc($result_series)) {
                     }
                 });
 
-                slides[index].classList.add('active');
+                if (slides[index]) {
+                    slides[index].classList.add('active');
+                }
                 if (indicatorsContainer.children[index]) {
                     indicatorsContainer.children[index].classList.add('active');
                 }
             }
 
+            // Funciones globales para el carousel
             window.nextSlide = function() {
                 currentSlide = (currentSlide + 1) % slides.length;
                 showSlide(currentSlide);
@@ -386,6 +473,7 @@ while ($peli = mysqli_fetch_assoc($result_series)) {
             }
 
             function createIndicators() {
+                indicatorsContainer.innerHTML = '';
                 slides.forEach((_, index) => {
                     const dot = document.createElement('button');
                     dot.className = 'w-3 h-3 rounded-full bg-white/50 hover:bg-white/80 transition-all duration-200';
@@ -394,13 +482,13 @@ while ($peli = mysqli_fetch_assoc($result_series)) {
                         showSlide(currentSlide);
                     });
                     if (index === 0) {
-                        dot.classList.add('active', 'bg-white');
+                        dot.classList.add('active');
                     }
                     indicatorsContainer.appendChild(dot);
                 });
             }
 
-            // Add CSS for active indicator and slides
+            // CSS para carousel
             const style = document.createElement('style');
             style.textContent = `
                 .indicators button.active {
@@ -412,14 +500,20 @@ while ($peli = mysqli_fetch_assoc($result_series)) {
                 .slide.active {
                     display: block;
                 }
+                .carousel {
+                    position: relative;
+                }
             `;
             document.head.appendChild(style);
 
-            createIndicators();
-            showSlide(currentSlide);
-
-            // Auto-advance carousel
-            setInterval(window.nextSlide, 8000);
+            // Inicializar carousel
+            if (slides.length > 0) {
+                createIndicators();
+                showSlide(0);
+                
+                // Auto-advance carousel cada 8 segundos
+                setInterval(window.nextSlide, 8000);
+            }
         });
     </script>
 </body>
