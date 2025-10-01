@@ -44,11 +44,12 @@ while ($peli = mysqli_fetch_assoc($result_series)) {
     <title>CineVice</title>
     <link href="../../src/output.css" rel="stylesheet">
     <link rel="icon" type="image/x-icon" href="./Imágenes/C-logo.png">
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
 </head>
 
-<body class="bg-gradient-to-br from-pink-100 via-purple-50 to-blue-100 dark:from-gray-900 dark:via-purple-900 dark:to-blue-900 min-h-screen transition-all duration-300">
+<body class="min-h-screen transition-all duration-300" id="body">
     <!-- Navbar -->
-    <header class="sticky top-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg border-b border-pink-200 dark:border-purple-700 shadow-lg">
+    <header class="sticky top-0 z-50 shadow-lg transition-all duration-300" id="navbar">
         <div class="container mx-auto px-4 py-3">
             <div class="flex items-center justify-between">
                 <!-- Logo -->
@@ -60,11 +61,11 @@ while ($peli = mysqli_fetch_assoc($result_series)) {
                     </a>
                     
                     <!-- Navigation Links -->
-                    <nav class="hidden md:flex space-x-6">
-                        <a href="./peliculas_series.php" class="text-gray-700 dark:text-gray-300 hover:text-pink-500 dark:hover:text-pink-400 transition-colors duration-200 font-medium">
+                    <nav class="hidden md:flex space-x-2">
+                        <a href="./peliculas_series.php" class="px-4 py-2 rounded-lg transition-all duration-200 hover:bg-blue-500 hover:text-white" id="navLink1">
                             Películas/Series
                         </a>
-                        <a href="./foros.php" class="text-gray-700 dark:text-gray-300 hover:text-purple-500 dark:hover:text-purple-400 transition-colors duration-200 font-medium">
+                        <a href="./foros.php" class="px-4 py-2 rounded-lg transition-all duration-200 hover:bg-blue-500 hover:text-white" id="navLink2">
                             Foros
                         </a>
                     </nav>
@@ -73,11 +74,9 @@ while ($peli = mysqli_fetch_assoc($result_series)) {
                 <!-- Right Section -->
                 <div class="flex items-center space-x-4">
                     <!-- Theme Toggle -->
-                    <button id="themeToggle" class="p-3 rounded-lg transition-colors duration-200 hover:bg-gray-200 dark:hover:bg-gray-700 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700">
-                        <!-- Sol para modo claro (mostrar cuando está en tema oscuro) -->
-                        <span class="text-2xl hidden dark:block">☀️</span>
-                        <!-- Luna para modo oscuro (mostrar cuando está en tema claro) -->
-                        <span class="text-2xl block dark:hidden">🌙</span>
+                    <button id="themeToggle" class="p-2 rounded-lg transition-colors duration-200 hover:bg-gray-200 dark:hover:bg-gray-700">
+                        <i data-feather="sun" class="w-5 h-5 hidden dark:block"></i>
+                        <i data-feather="moon" class="w-5 h-5 block dark:hidden"></i>
                     </button>
 
                     <!-- User Section -->
@@ -86,8 +85,8 @@ while ($peli = mysqli_fetch_assoc($result_series)) {
                         $user_avatar = getUserAvatar($_SESSION['usuario']['id'], $conexion);
                         ?>
                         <div class="flex items-center space-x-3">
-                            <img src="<?php echo $user_avatar; ?>" alt="Avatar" class="w-8 h-8 rounded-full border-2 border-pink-300 dark:border-purple-400">
-                            <a href="./Páginas/perfil.php" class="text-gray-700 dark:text-gray-300 hover:text-pink-500 dark:hover:text-pink-400 font-medium transition-colors duration-200">
+                            <img src="<?php echo $user_avatar; ?>" alt="Avatar" class="w-8 h-8 rounded-full border-2 border-pink-300 dark:border-purple-400 object-cover">
+                            <a href="./Páginas/perfil.php" class="hidden md:block font-medium hover:text-pink-500 transition-colors duration-200">
                                 <?php echo htmlspecialchars($_SESSION['usuario']['nombre']); ?>
                             </a>
                             <a href="./Páginas/logout.php" class="px-4 py-2 bg-gradient-to-r from-red-500 to-pink-500 text-white rounded-lg hover:from-red-600 hover:to-pink-600 transition-all duration-200 font-medium">
@@ -114,7 +113,7 @@ while ($peli = mysqli_fetch_assoc($result_series)) {
         <!-- Carousel Section -->
         <section class="py-8">
             <div class="container mx-auto px-4">
-                <div class="max-w-5xl mx-auto relative bg-white/20 dark:bg-gray-800/20 backdrop-blur-sm rounded-3xl overflow-hidden shadow-2xl">
+                <div class="max-w-5xl mx-auto relative rounded-3xl overflow-hidden shadow-2xl transition-all duration-300" id="carouselContainer">
                     <div class="carousel" id="carousel">
                         <div class="slide active relative h-96 md:h-[500px]">
                             <div class="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent z-10"></div>
@@ -187,9 +186,9 @@ while ($peli = mysqli_fetch_assoc($result_series)) {
         </section>
 
         <!-- Próximos lanzamientos -->
-        <section class="py-12 bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-900/20 dark:to-purple-900/20">
+        <section class="py-12 transition-all duration-300" id="section1">
             <div class="container mx-auto px-4">
-                <h2 class="text-4xl font-bold text-center mb-12 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                <h2 class="text-4xl font-bold text-center mb-12 transition-all duration-300" id="title1">
                     Próximos lanzamientos
                 </h2>
                 <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-8">
@@ -211,9 +210,9 @@ while ($peli = mysqli_fetch_assoc($result_series)) {
         </section>
 
         <!-- Películas más populares -->
-        <section class="py-12 bg-gradient-to-r from-pink-100 to-red-100 dark:from-pink-900/20 dark:to-red-900/20">
+        <section class="py-12 transition-all duration-300" id="section2">
             <div class="container mx-auto px-4">
-                <h2 class="text-4xl font-bold text-center mb-12 bg-gradient-to-r from-pink-600 to-red-600 bg-clip-text text-transparent">
+                <h2 class="text-4xl font-bold text-center mb-12 transition-all duration-300" id="title2">
                     Películas más populares
                 </h2>
                 <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-8">
@@ -235,9 +234,9 @@ while ($peli = mysqli_fetch_assoc($result_series)) {
         </section>
 
         <!-- Series más populares -->
-        <section class="py-12 bg-gradient-to-r from-purple-100 to-indigo-100 dark:from-purple-900/20 dark:to-indigo-900/20">
+        <section class="py-12 transition-all duration-300" id="section3">
             <div class="container mx-auto px-4">
-                <h2 class="text-4xl font-bold text-center mb-12 bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
+                <h2 class="text-4xl font-bold text-center mb-12 transition-all duration-300" id="title3">
                     Series más populares
                 </h2>
                 <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-8">
@@ -306,20 +305,31 @@ while ($peli = mysqli_fetch_assoc($result_series)) {
 
             <div class="border-t border-gray-700 mt-8 pt-8 text-center">
                 <p class="text-gray-400">&copy; 2025 CineVice. Todos los derechos reservados.</p>
+                <p class="text-gray-500 text-sm mt-2">Versión 0.5 Beta</p>
             </div>
         </div>
     </footer>
 
     <script>
+        // Initialize Feather Icons
+        feather.replace();
+
         document.addEventListener('DOMContentLoaded', function() {
-            // Theme Toggle - Copiado exactamente de perfil.php
+            // Theme Toggle - Sistema igual que perfil.php
             const themeToggle = document.getElementById('themeToggle');
-            const body = document.body;
-            const navbar = document.querySelector('header');
+            const body = document.getElementById('body');
+            const navbar = document.getElementById('navbar');
+            const carouselContainer = document.getElementById('carouselContainer');
+            const navLink1 = document.getElementById('navLink1');
+            const navLink2 = document.getElementById('navLink2');
             
-            // Elementos principales que necesitan cambiar de tema
-            const mainSections = document.querySelectorAll('section');
-            const footer = document.querySelector('footer');
+            // Secciones y títulos
+            const section1 = document.getElementById('section1');
+            const section2 = document.getElementById('section2');
+            const section3 = document.getElementById('section3');
+            const title1 = document.getElementById('title1');
+            const title2 = document.getElementById('title2');
+            const title3 = document.getElementById('title3');
 
             // Check for saved theme preference
             const savedTheme = localStorage.getItem('theme') || 'light';
@@ -337,107 +347,47 @@ while ($peli = mysqli_fetch_assoc($result_series)) {
                     enableDarkMode();
                     localStorage.setItem('theme', 'dark');
                 }
+                feather.replace();
             });
 
             function enableDarkMode() {
-                // Body
-                body.className = 'bg-gray-900 text-white min-h-screen transition-all duration-300 dark';
+                body.className = 'min-h-screen transition-all duration-300 dark bg-gray-900 text-white';
+                navbar.className = 'sticky top-0 z-50 shadow-lg transition-all duration-300 bg-gray-800 text-white';
+                carouselContainer.className = 'max-w-5xl mx-auto relative rounded-3xl overflow-hidden shadow-2xl transition-all duration-300 bg-gray-800/50 backdrop-blur-sm';
                 
-                // Navbar
-                if (navbar) {
-                    navbar.className = 'sticky top-0 z-50 bg-gray-800 backdrop-blur-lg border-b border-gray-700 shadow-lg text-white';
-                    
-                    // Hacer visibles los enlaces de navegación en tema oscuro
-                    const navLinks = navbar.querySelectorAll('nav a');
-                    navLinks.forEach(link => {
-                        link.className = 'text-gray-300 hover:text-pink-400 transition-colors duration-200 font-medium';
-                    });
-                    
-                    // Actualizar botón de tema para que se vea mejor
-                    const themeBtn = navbar.querySelector('#themeToggle');
-                    if (themeBtn) {
-                        themeBtn.className = 'p-2 rounded-lg transition-colors duration-200 hover:bg-gray-700 border border-gray-600 bg-gray-700';
-                    }
-                }
+                // Nav links
+                navLink1.className = 'px-4 py-2 rounded-lg transition-all duration-200 hover:bg-blue-500 hover:text-white text-gray-300';
+                navLink2.className = 'px-4 py-2 rounded-lg transition-all duration-200 hover:bg-blue-500 hover:text-white text-gray-300';
                 
-                // Secciones principales
-                mainSections.forEach(section => {
-                    if (section.classList.contains('py-12')) {
-                        // Secciones de películas
-                        section.className = section.className.replace(/from-\w+-\d+/g, 'from-gray-800')
-                                                           .replace(/to-\w+-\d+/g, 'to-gray-700')
-                                                           .replace(/dark:from-\w+-\d+\/\d+/g, '')
-                                                           .replace(/dark:to-\w+-\d+\/\d+/g, '');
-                    }
-                });
-
-                // Footer mantiene su estilo
-                if (footer) {
-                    footer.className = 'bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 text-white py-12 mt-16';
-                }
-
-                // Títulos de secciones
-                const titles = document.querySelectorAll('h2');
-                titles.forEach(title => {
-                    if (title.classList.contains('bg-gradient-to-r')) {
-                        title.className = 'text-4xl font-bold text-center mb-12 text-white';
-                    }
-                });
+                // Secciones
+                section1.className = 'py-12 transition-all duration-300 bg-gray-800';
+                section2.className = 'py-12 transition-all duration-300 bg-gray-900';
+                section3.className = 'py-12 transition-all duration-300 bg-gray-800';
+                
+                // Títulos
+                title1.className = 'text-4xl font-bold text-center mb-12 transition-all duration-300 text-white';
+                title2.className = 'text-4xl font-bold text-center mb-12 transition-all duration-300 text-white';
+                title3.className = 'text-4xl font-bold text-center mb-12 transition-all duration-300 text-white';
             }
 
             function enableLightMode() {
-                // Body  
-                body.className = 'bg-gradient-to-br from-pink-100 via-purple-50 to-blue-100 min-h-screen transition-all duration-300';
+                body.className = 'min-h-screen transition-all duration-300 bg-gradient-to-br from-pink-100 via-purple-50 to-blue-100 text-gray-900';
+                navbar.className = 'sticky top-0 z-50 shadow-lg transition-all duration-300 bg-white/80 backdrop-blur-lg border-b border-pink-200';
+                carouselContainer.className = 'max-w-5xl mx-auto relative rounded-3xl overflow-hidden shadow-2xl transition-all duration-300 bg-white/20 backdrop-blur-sm';
                 
-                // Navbar
-                if (navbar) {
-                    navbar.className = 'sticky top-0 z-50 bg-white/80 backdrop-blur-lg border-b border-pink-200 shadow-lg';
-                    
-                    // Restaurar enlaces de navegación en tema claro
-                    const navLinks = navbar.querySelectorAll('nav a');
-                    navLinks.forEach(link => {
-                        if (link.textContent.includes('Películas/Series')) {
-                            link.className = 'text-gray-700 hover:text-pink-500 transition-colors duration-200 font-medium';
-                        } else if (link.textContent.includes('Foros')) {
-                            link.className = 'text-gray-700 hover:text-purple-500 transition-colors duration-200 font-medium';
-                        }
-                    });
-                    
-                    // Restaurar botón de tema
-                    const themeBtn = navbar.querySelector('#themeToggle');
-                    if (themeBtn) {
-                        themeBtn.className = 'p-2 rounded-lg transition-colors duration-200 hover:bg-gray-200 border border-gray-300 bg-white';
-                    }
-                }
-
-                // Restaurar secciones originales
-                const sections = document.querySelectorAll('section');
-                sections.forEach((section, index) => {
-                    if (index === 1) { // Próximos lanzamientos
-                        section.className = 'py-12 bg-gradient-to-r from-blue-100 to-purple-100';
-                    } else if (index === 2) { // Películas populares
-                        section.className = 'py-12 bg-gradient-to-r from-pink-100 to-red-100';
-                    } else if (index === 3) { // Series populares
-                        section.className = 'py-12 bg-gradient-to-r from-purple-100 to-indigo-100';
-                    }
-                });
-
-                // Footer
-                if (footer) {
-                    footer.className = 'bg-gradient-to-r from-gray-900 via-purple-900 to-blue-900 text-white py-12 mt-16';
-                }
-
-                // Restaurar títulos originales
-                const titles = document.querySelectorAll('h2');
-                titles.forEach((title, index) => {
-                    if (index === 0) { // Próximos lanzamientos
-                        title.className = 'text-4xl font-bold text-center mb-12 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent';
-                    } else if (index === 1) { // Películas populares
-                        title.className = 'text-4xl font-bold text-center mb-12 bg-gradient-to-r from-pink-600 to-red-600 bg-clip-text text-transparent';
-                    } else if (index === 2) { // Series populares
-                        title.className = 'text-4xl font-bold text-center mb-12 bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent';
-                    }
-                });
+                // Nav links
+                navLink1.className = 'px-4 py-2 rounded-lg transition-all duration-200 hover:bg-blue-500 hover:text-white text-gray-700';
+                navLink2.className = 'px-4 py-2 rounded-lg transition-all duration-200 hover:bg-blue-500 hover:text-white text-gray-700';
+                
+                // Secciones
+                section1.className = 'py-12 transition-all duration-300 bg-gradient-to-r from-blue-100 to-purple-100';
+                section2.className = 'py-12 transition-all duration-300 bg-gradient-to-r from-pink-100 to-red-100';
+                section3.className = 'py-12 transition-all duration-300 bg-gradient-to-r from-purple-100 to-indigo-100';
+                
+                // Títulos
+                title1.className = 'text-4xl font-bold text-center mb-12 transition-all duration-300 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent';
+                title2.className = 'text-4xl font-bold text-center mb-12 transition-all duration-300 bg-gradient-to-r from-pink-600 to-red-600 bg-clip-text text-transparent';
+                title3.className = 'text-4xl font-bold text-center mb-12 transition-all duration-300 bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent';
             }
 
             // Carousel functionality
