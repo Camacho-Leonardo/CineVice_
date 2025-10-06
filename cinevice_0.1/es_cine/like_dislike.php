@@ -24,8 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 if (!empty($_SERVER['HTTP_REFERER'])) {
     header("Location: " . $_SERVER['HTTP_REFERER']);
 } else {
-    header("Location: index.php");
-}
+header("Location: ../../index.php");}
 exit;
 }
 ?>

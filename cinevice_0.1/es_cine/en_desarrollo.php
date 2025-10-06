@@ -102,7 +102,7 @@ $stmt->close();
             <div class="flex justify-between items-center h-16">
                 <!-- Logo and Navigation -->
                 <div class="flex items-center space-x-4">
-                    <a href="./index.php" class="group">
+                    <a href="../../index.php" class="group">
                         <h1 class="text-3xl font-black bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 bg-clip-text text-transparent hover:scale-105 transition-transform duration-300">
                             CINE<span class="text-blue-400">VICE</span>
                         </h1>

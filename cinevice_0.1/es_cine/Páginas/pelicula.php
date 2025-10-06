@@ -21,7 +21,7 @@
     <header>
         <div class="title-container">
             <div class="title">
-                <a href="../index.php" id="home-link">
+                <a href="../../index.php" id="home-link">
                     <h1>Cine<strong id="colored-h1">Vice</strong></h1>
                 </a>
             </div>

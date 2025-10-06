@@ -1,7 +1,7 @@
 <?php 
 session_start(); 
-require_once("conexion.php");
-require_once("./Páginas/get_user_avatar.php");
+require_once("./cinevice_0.1/es_cine/conexion.php");
+require_once("./cinevice_0.1/es_cine/Páginas/get_user_avatar.php");
 
 // Obtener películas por género
 $proximos_lanzamientos = [];
@@ -42,8 +42,8 @@ while ($peli = mysqli_fetch_assoc($result_series)) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CineVice</title>
-    <link href="../../src/output.css" rel="stylesheet">
-    <link rel="icon" type="image/x-icon" href="./Imágenes/C-logo.png">
+    <link href="./src/output.css" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="./cinevice_0.1/es_cine/Imágenes/C-logo.png">
     <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
 </head>
 
@@ -62,10 +62,10 @@ while ($peli = mysqli_fetch_assoc($result_series)) {
                     
                     <!-- Navigation Links -->
                     <nav class="hidden md:flex space-x-2">
-                        <a href="./peliculas_series.php" class="px-4 py-2 rounded-lg transition-all duration-200 hover:bg-blue-500 hover:text-white" id="navLink1">
+                        <a href="./cinevice_0.1/es_cine/peliculas_series.php" class="px-4 py-2 rounded-lg transition-all duration-200 hover:bg-blue-500 hover:text-white" id="navLink1">
                             Películas/Series
                         </a>
-                        <a href="./foros.php" class="px-4 py-2 rounded-lg transition-all duration-200 hover:bg-blue-500 hover:text-white" id="navLink2">
+                        <a href="./cinevice_0.1/es_cine/foros.php" class="px-4 py-2 rounded-lg transition-all duration-200 hover:bg-blue-500 hover:text-white" id="navLink2">
                             Foros
                         </a>
                     </nav>
@@ -86,19 +86,19 @@ while ($peli = mysqli_fetch_assoc($result_series)) {
                         ?>
                         <div class="flex items-center space-x-3">
                             <img src="<?php echo $user_avatar; ?>" alt="Avatar" class="w-8 h-8 rounded-full border-2 border-pink-300 dark:border-purple-400 object-cover">
-                            <a href="./Páginas/perfil.php" class="hidden md:block font-medium hover:text-pink-500 transition-colors duration-200">
+                            <a href="./cinevice_0.1/es_cine/Páginas/perfil.php" class="hidden md:block font-medium hover:text-pink-500 transition-colors duration-200">
                                 <?php echo htmlspecialchars($_SESSION['usuario']['nombre']); ?>
                             </a>
-                            <a href="./Páginas/logout.php" class="px-4 py-2 bg-gradient-to-r from-red-500 to-pink-500 text-white rounded-lg hover:from-red-600 hover:to-pink-600 transition-all duration-200 font-medium">
+                            <a href="./cinevice_0.1/es_cine/Páginas/logout.php" class="px-4 py-2 bg-gradient-to-r from-red-500 to-pink-500 text-white rounded-lg hover:from-red-600 hover:to-pink-600 transition-all duration-200 font-medium">
                                 Cerrar sesión
                             </a>
                         </div>
                     <?php else: ?>
                         <div class="flex space-x-3">
-                            <a href="./Páginas/formularios.php?inicio" class="px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-lg hover:from-blue-600 hover:to-purple-600 transition-all duration-200 font-medium">
+                            <a href="./cinevice_0.1/es_cine/Páginas/formularios.php?inicio" class="px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-lg hover:from-blue-600 hover:to-purple-600 transition-all duration-200 font-medium">
                                 Iniciar sesión
                             </a>
-                            <a href="./Páginas/formularios.php?registro" class="px-4 py-2 bg-gradient-to-r from-pink-500 to-purple-500 text-white rounded-lg hover:from-pink-600 hover:to-purple-600 transition-all duration-200 font-medium">
+                            <a href="./cinevice_0.1/es_cine/Páginas/formularios.php?registro" class="px-4 py-2 bg-gradient-to-r from-pink-500 to-purple-500 text-white rounded-lg hover:from-pink-600 hover:to-purple-600 transition-all duration-200 font-medium">
                                 Registrarse
                             </a>
                         </div>
@@ -119,64 +119,64 @@ while ($peli = mysqli_fetch_assoc($result_series)) {
                             <div class="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent z-10"></div>
                             <div class="slide-info absolute left-8 top-1/2 transform -translate-y-1/2 z-20 text-white max-w-md">
                                 <div class="slide-info-img-container mb-4">
-                                    <img src="./Imágenes/Carrousel/stitch_titulo.png" alt="stitch titulo" class="max-w-xs">
+                                    <img src="./cinevice_0.1/es_cine/Imágenes/Carrousel/stitch_titulo.png" alt="stitch titulo" class="max-w-xs">
                                 </div>
                                 <p class="text-lg leading-relaxed">Una solitaria niña hawaiana se hace amiga de un extraterrestre fugitivo y ayuda a sanar a su fragmentada familia.</p>
                             </div>
-                            <img src="./Imágenes/Carrousel/stitch_carrousel.webp" alt="Pelicula 1" class="w-full h-full object-cover">
+                            <img src="./cinevice_0.1/es_cine/Imágenes/Carrousel/stitch_carrousel.webp" alt="Pelicula 1" class="w-full h-full object-cover">
                         </div>
 
                         <div class="slide relative h-96 md:h-[500px]">
                             <div class="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent z-10"></div>
                             <div class="slide-info absolute left-8 top-1/2 transform -translate-y-1/2 z-20 text-white max-w-md">
                                 <div class="slide-info-img-container mb-4">
-                                    <img src="./Imágenes/Carrousel/minecraft_titulo.png" alt="minecraft titulo" class="max-w-xs">
+                                    <img src="./cinevice_0.1/es_cine/Imágenes/Carrousel/minecraft_titulo.png" alt="minecraft titulo" class="max-w-xs">
                                 </div>
                                 <p class="text-lg leading-relaxed">El malvado dragón de Ender está en su camino a la destrucción, haciendo que una chica joven y su grupo de aventureros amigos intenten salvar Overworld.</p>
                             </div>
-                            <img src="./Imágenes/Carrousel/minecraft_carrousel.webp" alt="Pelicula 2" class="w-full h-full object-cover">
+                            <img src="./cinevice_0.1/es_cine/Imágenes/Carrousel/minecraft_carrousel.webp" alt="Pelicula 2" class="w-full h-full object-cover">
                         </div>
 
                         <div class="slide relative h-96 md:h-[500px]">
                             <div class="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent z-10"></div>
                             <div class="slide-info absolute left-8 top-1/2 transform -translate-y-1/2 z-20 text-white max-w-md">
                                 <div class="slide-info-img-container mb-4">
-                                    <img src="./Imágenes/Carrousel/eleternauta_titulo.png" alt="eternauta titulo" class="max-w-xs">
+                                    <img src="./cinevice_0.1/es_cine/Imágenes/Carrousel/eleternauta_titulo.png" alt="eternauta titulo" class="max-w-xs">
                                 </div>
                                 <p class="text-lg leading-relaxed">Sigue a Juan Salvo junto con un grupo de supervivientes mientras luchan contra una amenaza alienígena.</p>
                             </div>
-                            <img src="./Imágenes/Carrousel/eternauta_carrousel.webp" alt="Pelicula 3" class="w-full h-full object-cover">
+                            <img src="./cinevice_0.1/es_cine/Imágenes/Carrousel/eternauta_carrousel.webp" alt="Pelicula 3" class="w-full h-full object-cover">
                         </div>
 
                         <div class="slide relative h-96 md:h-[500px]">
                             <div class="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent z-10"></div>
                             <div class="slide-info absolute left-8 top-1/2 transform -translate-y-1/2 z-20 text-white max-w-md">
                                 <div class="slide-info-img-container mb-4">
-                                    <img src="./Imágenes/Carrousel/thelastofus_titulo.png" alt="the last of us titulo" class="max-w-xs">
+                                    <img src="./cinevice_0.1/es_cine/Imágenes/Carrousel/thelastofus_titulo.png" alt="the last of us titulo" class="max-w-xs">
                                 </div>
                                 <p class="text-lg leading-relaxed">Joel y Ellie, una pareja conectada a través de la dureza del mundo en el que viven.</p>
                             </div>
-                            <img src="./Imágenes/Carrousel/thelasofus_carrousel.webp" alt="Pelicula 4" class="w-full h-full object-cover">
+                            <img src="./cinevice_0.1/es_cine/Imágenes/Carrousel/thelasofus_carrousel.webp" alt="Pelicula 4" class="w-full h-full object-cover">
                         </div>
 
                         <div class="slide relative h-96 md:h-[500px]">
                             <div class="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent z-10"></div>
                             <div class="slide-info absolute left-8 top-1/2 transform -translate-y-1/2 z-20 text-white max-w-md">
                                 <div class="slide-info-img-container mb-4">
-                                    <img src="./Imágenes/Carrousel/misionimposible_titulo.png" alt="mision imposible titulo" class="max-w-xs">
+                                    <img src="./cinevice_0.1/es_cine/Imágenes/Carrousel/misionimposible_titulo.png" alt="mision imposible titulo" class="max-w-xs">
                                 </div>
                                 <p class="text-lg leading-relaxed">Ethan y su equipo tienen la misión de encontrar y destruir a una IA conocida como La Entidad.</p>
                             </div>
-                            <img src="./Imágenes/Carrousel/misionimposible_carrousel.webp" alt="Pelicula 5" class="w-full h-full object-cover">
+                            <img src="./cinevice_0.1/es_cine/Imágenes/Carrousel/misionimposible_carrousel.webp" alt="Pelicula 5" class="w-full h-full object-cover">
                         </div>
                     </div>
 
                     <!-- Navigation Buttons -->
                     <button class="nav prev absolute left-4 top-1/2 transform -translate-y-1/2 z-30 bg-white/20 hover:bg-white/40 backdrop-blur-sm rounded-full p-3 transition-all duration-200" onclick="prevSlide()">
-                        <img src="./Imágenes/flecha-izquierda-carrusel.png" alt="left-arrow" class="w-6 h-6">
+                        <img src="./cinevice_0.1/es_cine/Imágenes/flecha-izquierda-carrusel.png" alt="left-arrow" class="w-6 h-6">
                     </button>
                     <button class="nav next absolute right-4 top-1/2 transform -translate-y-1/2 z-30 bg-white/20 hover:bg-white/40 backdrop-blur-sm rounded-full p-3 transition-all duration-200" onclick="nextSlide()">
-                        <img src="./Imágenes/flecha-derecha-carrusel.png" alt="right-arrow" class="w-6 h-6">
+                        <img src="./cinevice_0.1/es_cine/Imágenes/flecha-derecha-carrusel.png" alt="right-arrow" class="w-6 h-6">
                     </button>
 
                     <!-- Indicators -->
@@ -194,9 +194,9 @@ while ($peli = mysqli_fetch_assoc($result_series)) {
                 <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-8">
                     <?php foreach ($proximos_lanzamientos as $peli): ?>
                         <div class="group cursor-pointer">
-                            <a href="en_desarrollo.php?peli_id=<?php echo $peli['peli_id']; ?>" class="block">
+                            <a href="./cinevice_0.1/es_cine/en_desarrollo.php?peli_id=<?php echo $peli['peli_id']; ?>" class="block">
                                 <div class="relative overflow-hidden rounded-2xl shadow-lg group-hover:shadow-2xl transition-all duration-300 transform group-hover:scale-105">
-                                    <img src="./Imágenes/Posters/<?php echo $peli['poster']; ?>" alt="<?php echo $peli['nombre']; ?>" class="w-full h-80 object-cover" onerror="this.src='./Imágenes/default-poster.jpg'">
+                                    <img src="./cinevice_0.1/es_cine/Imágenes/Posters/<?php echo $peli['poster']; ?>" alt="<?php echo $peli['nombre']; ?>" class="w-full h-80 object-cover" onerror="this.src='./cinevice_0.1/es_cine/Imágenes/default-poster.jpg'">
                                     <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                                     <div class="absolute bottom-4 left-4 right-4 text-white transform translate-y-full group-hover:translate-y-0 transition-transform duration-300">
                                         <h3 class="font-bold text-lg"><?php echo $peli['nombre']; ?></h3>
@@ -218,9 +218,9 @@ while ($peli = mysqli_fetch_assoc($result_series)) {
                 <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-8">
                     <?php foreach ($pelis_populares as $peli): ?>
                         <div class="group cursor-pointer">
-                            <a href="en_desarrollo.php?peli_id=<?php echo $peli['peli_id']; ?>" class="block">
+                            <a href="./cinevice_0.1/es_cine/en_desarrollo.php?peli_id=<?php echo $peli['peli_id']; ?>" class="block">
                                 <div class="relative overflow-hidden rounded-2xl shadow-lg group-hover:shadow-2xl transition-all duration-300 transform group-hover:scale-105">
-                                    <img src="./Imágenes/Posters/<?php echo $peli['poster']; ?>" alt="<?php echo $peli['nombre']; ?>" class="w-full h-80 object-cover" onerror="this.src='./Imágenes/default-poster.jpg'">
+                                    <img src="./cinevice_0.1/es_cine/Imágenes/Posters/<?php echo $peli['poster']; ?>" alt="<?php echo $peli['nombre']; ?>" class="w-full h-80 object-cover" onerror="this.src='./cinevice_0.1/es_cine/Imágenes/default-poster.jpg'">
                                     <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                                     <div class="absolute bottom-4 left-4 right-4 text-white transform translate-y-full group-hover:translate-y-0 transition-transform duration-300">
                                         <h3 class="font-bold text-lg"><?php echo $peli['nombre']; ?></h3>
@@ -242,9 +242,9 @@ while ($peli = mysqli_fetch_assoc($result_series)) {
                 <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-8">
                     <?php foreach ($series_populares as $peli): ?>
                         <div class="group cursor-pointer">
-                            <a href="en_desarrollo.php?peli_id=<?php echo $peli['peli_id']; ?>" class="block">
+                            <a href="./cinevice_0.1/es_cine/en_desarrollo.php?peli_id=<?php echo $peli['peli_id']; ?>" class="block">
                                 <div class="relative overflow-hidden rounded-2xl shadow-lg group-hover:shadow-2xl transition-all duration-300 transform group-hover:scale-105">
-                                    <img src="./Imágenes/Posters/<?php echo $peli['poster']; ?>" alt="<?php echo $peli['nombre']; ?>" class="w-full h-80 object-cover" onerror="this.src='./Imágenes/default-poster.jpg'">
+                                    <img src="./cinevice_0.1/es_cine/Imágenes/Posters/<?php echo $peli['poster']; ?>" alt="<?php echo $peli['nombre']; ?>" class="w-full h-80 object-cover" onerror="this.src='./cinevice_0.1/es_cine/Imágenes/default-poster.jpg'">
                                     <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                                     <div class="absolute bottom-4 left-4 right-4 text-white transform translate-y-full group-hover:translate-y-0 transition-transform duration-300">
                                         <h3 class="font-bold text-lg"><?php echo $peli['nombre']; ?></h3>
@@ -294,10 +294,10 @@ while ($peli = mysqli_fetch_assoc($result_series)) {
                 <div>
                     <h4 class="text-lg font-semibold mb-4 text-purple-400">Enlaces</h4>
                     <div class="space-y-2">
-                        <a href="./peliculas_series.php" class="block text-gray-300 hover:text-purple-400 transition-colors duration-200">Películas/Series</a>
-                        <a href="./foros.php" class="block text-gray-300 hover:text-purple-400 transition-colors duration-200">Foros</a>
+                        <a href="./cinevice_0.1/es_cine/peliculas_series.php" class="block text-gray-300 hover:text-purple-400 transition-colors duration-200">Películas/Series</a>
+                        <a href="./cinevice_0.1/es_cine/foros.php" class="block text-gray-300 hover:text-purple-400 transition-colors duration-200">Foros</a>
                         <?php if (isset($_SESSION['usuario'])): ?>
-                            <a href="./Páginas/perfil.php" class="block text-gray-300 hover:text-purple-400 transition-colors duration-200">Mi Perfil</a>
+                            <a href="./cinevice_0.1/es_cine/Páginas/perfil.php" class="block text-gray-300 hover:text-purple-400 transition-colors duration-200">Mi Perfil</a>
                         <?php endif; ?>
                     </div>
                 </div>

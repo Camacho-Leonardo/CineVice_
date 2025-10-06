@@ -6,8 +6,8 @@ $op_id = $_GET['op_id'] ?? null;
 $peli_id = $_GET['peli_id'] ?? null;
 
 if (!$op_id || !$peli_id) {
-    header("Location: index.php");
-    exit;
+header("Location: ../../index.php");    
+exit;
 }
 
 // Obtener la opinión
@@ -52,7 +52,7 @@ if ($peli_id) {
             <div class="flex justify-between items-center h-16">
                 <!-- Logo and Navigation -->
                 <div class="flex items-center space-x-4">
-                    <a href="./index.php" class="group">
+                    <a href="../../index.php" class="group">
                         <h1 class="text-3xl font-black bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 bg-clip-text text-transparent hover:scale-105 transition-transform duration-300">
                             CINE<span class="text-blue-400">VICE</span>
                         </h1>
@@ -112,7 +112,7 @@ if ($peli_id) {
                         <i data-feather="arrow-left" class="w-4 h-4"></i>
                         <span>Volver</span>
                     </a>
-                    <a href="index.php" class="inline-flex items-center space-x-2 px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-200">
+                    <a href="../../index.php" class="inline-flex items-center space-x-2 px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-200">
                         <i data-feather="home" class="w-4 h-4"></i>
                         <span>Ir al inicio</span>
                     </a>
