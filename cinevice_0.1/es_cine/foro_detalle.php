@@ -71,7 +71,7 @@ $comentarios_result = $stmt->get_result();
             <div class="flex justify-between items-center h-16">
                 <!-- Logo -->
                 <div class="flex items-center">
-                    <a href="/index.php" class="flex items-center space-x-2">
+                    <a href="../../index.php" class="flex items-center space-x-2">
                         <img src="./Imágenes/cine-vice-navbar.png" alt="CineVice" class="h-10">
                     </a>
                 </div>
