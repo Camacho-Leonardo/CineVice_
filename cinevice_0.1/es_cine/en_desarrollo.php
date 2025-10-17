@@ -108,59 +108,30 @@ $stmt->close();
                         </h1>
                     </a>
                     <div class="hidden md:flex space-x-2 ml-8">
-                        <a href="peliculas_series.php" class="px-4 py-2 rounded-lg transition-all duration-200 hover:bg-blue-500 hover:text-white">
+                        <a href="peliculas_series.php" class="px-4 py-2 rounded-lg transition-all duration-200 hover:bg-blue-500 hover:text-white" id="nav-link-1">
                             Películas/Series
                         </a>
-                        <a href="foros.php" class="px-4 py-2 rounded-lg transition-all duration-200 hover:bg-blue-500 hover:text-white">
+                        <a href="foros.php" class="px-4 py-2 rounded-lg transition-all duration-200 hover:bg-blue-500 hover:text-white" id="nav-link-2">
                             Foros
                         </a>
                     </div>
                 </div>
 
-                <!-- Search and Genre Filter -->
-                <div class="flex items-center space-x-4 flex-1 max-w-2xl mx-8">
-                    <!-- Search Bar -->
-                    <div class="relative flex-1">
-                        <input 
-                            type="text" 
-                            id="searchInput" 
-                            placeholder="Buscar películas o géneros..." 
-                            class="w-full px-4 py-2 pl-10 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400"
-                        >
-                        <i data-feather="search" class="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                        <div id="suggestions" class="absolute top-full left-0 right-0 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg mt-1 hidden z-50"></div>
-                    </div>
-
-                    <!-- Genre Filter -->
-                    <select 
-                        id="generoDropdown" 
-                        class="px-4 py-2 rounded-lg border border-gray-300 bg-white text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:focus:ring-blue-400"
-                    >
-                        <option value="">-- Ver por género --</option>
-                        <?php
-                        $genDropdown = mysqli_query($conexion, "SELECT * FROM generos");
-                        while ($g = mysqli_fetch_assoc($genDropdown)) {
-                            echo '<option value="' . strtolower($g['nombre']) . '">' . ucfirst($g['nombre']) . '</option>';
-                        }
-                        ?>
-                    </select>
-                </div>
-
                 <!-- Right Section -->
                 <div class="flex items-center space-x-4">
                     <!-- Theme Toggle -->
-                    <button id="themeToggle" class="p-2 rounded-lg transition-colors duration-200 hover:bg-gray-200 dark:hover:bg-gray-700">
-                        <i data-feather="sun" class="w-5 h-5 hidden dark:block"></i>
-                        <i data-feather="moon" class="w-5 h-5 block dark:hidden"></i>
+                    <button id="themeToggle" class="p-2 rounded-lg transition-colors duration-200 hover:bg-gray-200" id="theme-btn">
+                        <i data-feather="sun" class="w-5 h-5 hidden dark-icon"></i>
+                        <i data-feather="moon" class="w-5 h-5 light-icon"></i>
                     </button>
 
                     <!-- User Section -->
                     <?php if (isset($_SESSION['usuario'])): ?>
-                        <a href="./Páginas/perfil.php" class="flex items-center space-x-2 px-4 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200">
+                        <a href="./Páginas/perfil.php" class="flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors duration-200" id="profile-link">
                             <div class="w-8 h-8 bg-gradient-to-r from-pink-500 to-blue-500 rounded-full flex items-center justify-center">
                                 <span class="text-white font-bold text-sm"><?php echo strtoupper(substr($_SESSION['usuario']['nombre'], 0, 1)); ?></span>
                             </div>
-                            <span class="hidden md:block font-medium"><?php echo htmlspecialchars($_SESSION['usuario']['nombre']); ?></span>
+                            <span class="hidden md:block font-medium" id="user-name"><?php echo htmlspecialchars($_SESSION['usuario']['nombre']); ?></span>
                         </a>
                         <a href="./Páginas/logout.php" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors duration-200">
                             Cerrar Sesión
@@ -198,7 +169,7 @@ $stmt->close();
     <main class="max-w-7xl mx-auto px-4 py-8">
         <?php if ($peli): ?>
             <!-- Movie Details -->
-            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden mb-8 transition-all duration-300">
+            <div class="rounded-2xl shadow-xl overflow-hidden mb-8 transition-all duration-300" id="movie-card">
                 <div class="md:flex">
                     <!-- Poster -->
                     <div class="md:w-1/3 lg:w-1/4">
@@ -208,46 +179,46 @@ $stmt->close();
                     </div>
                     
                     <!-- Info -->
-                    <div class="md:w-2/3 lg:w-3/4 p-8">
+                    <div class="md:w-2/3 lg:w-3/4 p-8" id="movie-info">
                         <h1 class="text-4xl font-bold bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 bg-clip-text text-transparent mb-4">
                             <?php echo htmlspecialchars($peli["nombre"]); ?>
                         </h1>
                         
-                        <p class="text-lg opacity-80 mb-6 leading-relaxed">
+                        <p class="text-lg opacity-80 mb-6 leading-relaxed" id="movie-desc">
                             <?php echo htmlspecialchars($peli["descripcion"]); ?>
                         </p>
                         
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6" id="movie-details">
                             <div class="flex items-center space-x-2">
                                 <i data-feather="calendar" class="w-5 h-5 text-blue-500"></i>
-                                <span><strong>Emisión:</strong> <?php echo htmlspecialchars($peli["emision"]); ?></span>
+                                <span id="movie-emission"><strong>Emisión:</strong> <?php echo htmlspecialchars($peli["emision"]); ?></span>
                             </div>
                             <div class="flex items-center space-x-2">
                                 <i data-feather="clock" class="w-5 h-5 text-blue-500"></i>
-                                <span><strong>Duración:</strong> <?php echo htmlspecialchars($peli["duracion"]); ?></span>
+                                <span id="movie-duration"><strong>Duración:</strong> <?php echo htmlspecialchars($peli["duracion"]); ?></span>
                             </div>
                             <div class="flex items-center space-x-2">
                                 <i data-feather="globe" class="w-5 h-5 text-blue-500"></i>
-                                <span><strong>País:</strong> <?php echo htmlspecialchars($peli["pais"]); ?></span>
+                                <span id="movie-country"><strong>País:</strong> <?php echo htmlspecialchars($peli["pais"]); ?></span>
                             </div>
                             <div class="flex items-center space-x-2">
                                 <i data-feather="volume-2" class="w-5 h-5 text-blue-500"></i>
-                                <span><strong>Idioma:</strong> <?php echo htmlspecialchars($peli["idioma"]); ?></span>
+                                <span id="movie-language"><strong>Idioma:</strong> <?php echo htmlspecialchars($peli["idioma"]); ?></span>
                             </div>
                             <?php if ($peli["episodios"]): ?>
                             <div class="flex items-center space-x-2">
                                 <i data-feather="list" class="w-5 h-5 text-blue-500"></i>
-                                <span><strong>Episodios:</strong> <?php echo htmlspecialchars($peli["episodios"]); ?></span>
+                                <span id="movie-episodes"><strong>Episodios:</strong> <?php echo htmlspecialchars($peli["episodios"]); ?></span>
                             </div>
                             <?php endif; ?>
                         </div>
 
                         <?php if (!empty($generos)): ?>
                             <div class="mb-6">
-                                <strong class="text-lg mb-3 block">Géneros:</strong>
-                                <div class="flex flex-wrap gap-2">
+                                <strong class="text-lg mb-3 block" id="genres-title">Géneros:</strong>
+                                <div class="flex flex-wrap gap-2" id="genres-container">
                                     <?php foreach ($generos as $g): ?>
-                                        <span class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full text-sm font-medium">
+                                        <span class="px-3 py-1 rounded-full text-sm font-medium genre-badge">
                                             <?php echo htmlspecialchars($g); ?>
                                         </span>
                                     <?php endforeach; ?>
@@ -260,15 +231,15 @@ $stmt->close();
                                 <i data-feather="star" class="w-6 h-6 text-yellow-500 fill-current"></i>
                                 <span class="text-2xl font-bold text-yellow-600"><?php echo $promedio; ?>/5</span>
                             </div>
-                            <span class="text-sm opacity-70">(<?php echo $total_op; ?> opiniones)</span>
+                            <span class="text-sm opacity-70" id="review-count">(<?php echo $total_op; ?> opiniones)</span>
                         </div>
                     </div>
                 </div>
             </div>
 
             <!-- Filter Controls -->
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-8 transition-all duration-300">
-                <h2 class="text-xl font-bold mb-4 flex items-center space-x-2">
+            <div class="rounded-xl shadow-lg p-6 mb-8 transition-all duration-300" id="filter-card">
+                <h2 class="text-xl font-bold mb-4 flex items-center space-x-2" id="filter-title">
                     <i data-feather="filter" class="w-5 h-5 text-blue-500"></i>
                     <span>Filtrar Opiniones</span>
                 </h2>
@@ -277,8 +248,8 @@ $stmt->close();
                     <input type="hidden" name="peli_id" value="<?php echo $peli_id; ?>">
                     
                     <div>
-                        <label for="orden" class="block text-sm font-medium mb-1">Ordenar por:</label>
-                        <select name="orden" id="orden" class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-200 dark:bg-gray-700 dark:text-white">
+                        <label for="orden" class="block text-sm font-medium mb-1" id="order-label">Ordenar por:</label>
+                        <select name="orden" id="orden" class="px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-200 filter-select">
                             <option value="fecha" <?php if (($_GET['orden'] ?? '') === 'fecha') echo 'selected'; ?>>Más recientes</option>
                             <option value="likes" <?php if (($_GET['orden'] ?? '') === 'likes') echo 'selected'; ?>>Más likes</option>
                             <option value="dislikes" <?php if (($_GET['orden'] ?? '') === 'dislikes') echo 'selected'; ?>>Más dislikes</option>
@@ -286,8 +257,8 @@ $stmt->close();
                     </div>
 
                     <div>
-                        <label for="puntuacion" class="block text-sm font-medium mb-1">Filtrar por estrellas:</label>
-                        <select name="puntuacion" id="puntuacion" class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-200 dark:bg-gray-700 dark:text-white">
+                        <label for="puntuacion" class="block text-sm font-medium mb-1" id="rating-label">Filtrar por estrellas:</label>
+                        <select name="puntuacion" id="puntuacion" class="px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-200 filter-select">
                             <option value="">Todas</option>
                             <?php for ($i = 1; $i <= 5; $i++): ?>
                                 <option value="<?php echo $i; ?>" <?php if (($_GET['puntuacion'] ?? '') == $i) echo 'selected'; ?>>
@@ -305,8 +276,8 @@ $stmt->close();
             </div>
 
             <!-- Opinions Section -->
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-8 transition-all duration-300">
-                <h2 class="text-2xl font-bold mb-6 flex items-center space-x-2">
+            <div class="rounded-xl shadow-lg p-6 mb-8 transition-all duration-300" id="opinions-card">
+                <h2 class="text-2xl font-bold mb-6 flex items-center space-x-2" id="opinions-title">
                     <i data-feather="message-circle" class="w-6 h-6 text-blue-500"></i>
                     <span>Opiniones de la comunidad</span>
                 </h2>
@@ -314,14 +285,14 @@ $stmt->close();
                 <?php if (!empty($opiniones)): ?>
                     <div class="space-y-6">
                         <?php foreach ($opiniones as $op): ?>
-                            <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-6 hover:shadow-md transition-shadow duration-300" data-opinion-id="<?php echo $op['op_id']; ?>">
+                            <div class="border rounded-lg p-6 hover:shadow-md transition-shadow duration-300 opinion-card" data-opinion-id="<?php echo $op['op_id']; ?>">
                                 <div class="flex justify-between items-start mb-4">
                                     <div class="flex items-center space-x-3">
                                         <div class="w-10 h-10 bg-gradient-to-r from-pink-500 to-blue-500 rounded-full flex items-center justify-center">
                                             <span class="text-white font-bold"><?php echo strtoupper(substr($op['nombre'], 0, 1)); ?></span>
                                         </div>
                                         <div>
-                                            <strong class="text-lg"><?php echo htmlspecialchars($op['nombre']); ?></strong>
+                                            <strong class="text-lg opinion-user"><?php echo htmlspecialchars($op['nombre']); ?></strong>
                                             <div class="flex items-center space-x-1 mt-1">
                                                 <?php for ($i = 1; $i <= 5; $i++): ?>
                                                     <i data-feather="star" class="w-4 h-4 <?php echo $i <= $op['puntuacion'] ? 'text-yellow-400 fill-current' : 'text-gray-300'; ?>"></i>
@@ -329,10 +300,10 @@ $stmt->close();
                                             </div>
                                         </div>
                                     </div>
-                                    <span class="text-sm opacity-70"><?php echo date("d/m/Y H:i", strtotime($op['fecha'])); ?></span>
+                                    <span class="text-sm opacity-70 opinion-date"><?php echo date("d/m/Y H:i", strtotime($op['fecha'])); ?></span>
                                 </div>
 
-                                <p class="text-gray-700 dark:text-gray-300 mb-4 leading-relaxed">
+                                <p class="mb-4 leading-relaxed opinion-content">
                                     <?php echo nl2br(htmlspecialchars($op['contenido'])); ?>
                                 </p>
 
@@ -340,14 +311,14 @@ $stmt->close();
                                     <div class="flex items-center space-x-4">
                                         <?php if (isset($_SESSION['usuario'])): ?>
                                             <button onclick="toggleReaction(<?php echo $op['op_id']; ?>, 'like')" 
-                                                    class="flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-green-50 dark:hover:bg-green-900/20 transition-colors duration-200 like-btn"
+                                                    class="flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors duration-200 like-btn"
                                                     id="like-btn-<?php echo $op['op_id']; ?>">
                                                 <i data-feather="thumbs-up" class="w-4 h-4 text-green-600"></i>
                                                 <span class="like-count"><?php echo $op['op_likes']; ?></span>
                                             </button>
 
                                             <button onclick="toggleReaction(<?php echo $op['op_id']; ?>, 'dislike')" 
-                                                    class="flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors duration-200 dislike-btn"
+                                                    class="flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors duration-200 dislike-btn"
                                                     id="dislike-btn-<?php echo $op['op_id']; ?>">
                                                 <i data-feather="thumbs-down" class="w-4 h-4 text-red-600"></i>
                                                 <span class="dislike-count"><?php echo $op['op_dislikes']; ?></span>
@@ -370,7 +341,7 @@ $stmt->close();
                                     <?php if (isset($_SESSION['usuario']) && $_SESSION['usuario']['id'] == $op['usu_id']): ?>
                                         <div class="flex items-center space-x-2">
                                             <a href="editar_opinion.php?op_id=<?php echo $op['op_id']; ?>&peli_id=<?php echo $peli_id; ?>" 
-                                               class="flex items-center space-x-1 px-3 py-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors duration-200">
+                                               class="flex items-center space-x-1 px-3 py-2 text-blue-600 rounded-lg transition-colors duration-200 edit-btn">
                                                 <i data-feather="edit-2" class="w-4 h-4"></i>
                                                 <span>Editar</span>
                                             </a>
@@ -378,7 +349,7 @@ $stmt->close();
                                                   onsubmit="return confirm('¿Estás seguro de que querés eliminar esta opinión?');">
                                                 <input type="hidden" name="op_id" value="<?php echo $op['op_id']; ?>">
                                                 <input type="hidden" name="peli_id" value="<?php echo $peli_id; ?>">
-                                                <button type="submit" class="flex items-center space-x-1 px-3 py-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors duration-200">
+                                                <button type="submit" class="flex items-center space-x-1 px-3 py-2 text-red-600 rounded-lg transition-colors duration-200 delete-btn">
                                                     <i data-feather="trash-2" class="w-4 h-4"></i>
                                                     <span>Eliminar</span>
                                                 </button>
@@ -390,18 +361,18 @@ $stmt->close();
                         <?php endforeach; ?>
                     </div>
                 <?php else: ?>
-                    <div class="text-center py-12">
+                    <div class="text-center py-12" id="no-opinions">
                         <i data-feather="message-square" class="w-16 h-16 mx-auto mb-4 text-gray-400"></i>
-                        <h3 class="text-xl font-semibold text-gray-600 dark:text-gray-300 mb-2">No hay opiniones aún</h3>
-                        <p class="text-gray-500 dark:text-gray-400">Sé el primero en compartir tu opinión sobre esta película</p>
+                        <h3 class="text-xl font-semibold mb-2 no-opinions-title">No hay opiniones aún</h3>
+                        <p class="no-opinions-text">Sé el primero en compartir tu opinión sobre esta película</p>
                     </div>
                 <?php endif; ?>
             </div>
 
             <!-- Opinion Form -->
             <?php if (isset($_SESSION['usuario'])): ?>
-                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 transition-all duration-300">
-                    <h3 class="text-xl font-bold mb-6 flex items-center space-x-2">
+                <div class="rounded-xl shadow-lg p-6 transition-all duration-300" id="form-card">
+                    <h3 class="text-xl font-bold mb-6 flex items-center space-x-2" id="form-title">
                         <i data-feather="edit-3" class="w-5 h-5 text-blue-500"></i>
                         <span>Dejar una opinión</span>
                     </h3>
@@ -411,9 +382,9 @@ $stmt->close();
                         <input type="hidden" name="usu_id" value="<?php echo $_SESSION['usuario']['id']; ?>">
 
                         <div>
-                            <label for="puntuacion_form" class="block text-sm font-medium mb-2">Puntuación:</label>
+                            <label for="puntuacion_form" class="block text-sm font-medium mb-2" id="form-rating-label">Puntuación:</label>
                             <select name="puntuacion" id="puntuacion_form" required 
-                                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-200 dark:bg-gray-700 dark:text-white">
+                                    class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-200 form-select">
                                 <option value="">Seleccionar</option>
                                 <?php for ($i = 1; $i <= 5; $i++): ?>
                                     <option value="<?php echo $i; ?>"><?php echo $i; ?> estrella<?php echo $i > 1 ? 's' : ''; ?></option>
@@ -422,10 +393,10 @@ $stmt->close();
                         </div>
 
                         <div>
-                            <label for="contenido" class="block text-sm font-medium mb-2">Tu opinión:</label>
+                            <label for="contenido" class="block text-sm font-medium mb-2" id="form-content-label">Tu opinión:</label>
                             <textarea name="contenido" id="contenido" rows="4" required
                                       placeholder="Escribe lo que pensás..." 
-                                      class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-200 dark:bg-gray-700 dark:text-white resize-none"></textarea>
+                                      class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-200 resize-none form-textarea"></textarea>
                         </div>
 
                         <button type="submit" class="w-full px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-200 flex items-center justify-center space-x-2">
@@ -435,10 +406,10 @@ $stmt->close();
                     </form>
                 </div>
             <?php else: ?>
-                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 text-center transition-all duration-300">
+                <div class="rounded-xl shadow-lg p-8 text-center transition-all duration-300" id="login-prompt">
                     <i data-feather="user" class="w-16 h-16 mx-auto mb-4 text-gray-400"></i>
-                    <h3 class="text-xl font-semibold mb-2">¿Querés dejar tu opinión?</h3>
-                    <p class="text-gray-600 dark:text-gray-400 mb-6">Inicia sesión para compartir tu experiencia con esta película</p>
+                    <h3 class="text-xl font-semibold mb-2" id="login-title">¿Querés dejar tu opinión?</h3>
+                    <p class="mb-6" id="login-text">Inicia sesión para compartir tu experiencia con esta película</p>
                     <a href="Páginas/formularios.php?inicio" class="inline-flex items-center space-x-2 px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-200">
                         <i data-feather="log-in" class="w-4 h-4"></i>
                         <span>Iniciar Sesión</span>
@@ -447,10 +418,10 @@ $stmt->close();
             <?php endif; ?>
 
         <?php else: ?>
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-12 text-center transition-all duration-300">
+            <div class="rounded-xl shadow-lg p-12 text-center transition-all duration-300" id="not-found">
                 <i data-feather="film" class="w-24 h-24 mx-auto mb-6 text-gray-400"></i>
-                <h1 class="text-3xl font-bold text-gray-600 dark:text-gray-300 mb-4">Película no encontrada</h1>
-                <p class="text-gray-500 dark:text-gray-400 mb-8">Lo sentimos, la película que buscás no existe o ha sido eliminada.</p>
+                <h1 class="text-3xl font-bold mb-4" id="not-found-title">Película no encontrada</h1>
+                <p class="mb-8" id="not-found-text">Lo sentimos, la película que buscás no existe o ha sido eliminada.</p>
                 <a href="peliculas_series.php" class="inline-flex items-center space-x-2 px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-200">
                     <i data-feather="arrow-left" class="w-4 h-4"></i>
                     <span>Volver a películas</span>
@@ -490,54 +461,262 @@ $stmt->close();
         function enableDarkMode() {
             body.className = 'min-h-screen transition-all duration-300 dark bg-gray-900 text-white';
             navbar.className = 'shadow-lg transition-all duration-300 bg-gray-800 text-white sticky top-0 z-50';
+            
+            // Update all themed elements
+            updateThemedElements('dark');
+            
+            // Update icons
+            document.querySelectorAll('.light-icon').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.dark-icon').forEach(el => el.classList.remove('hidden'));
         }
 
         function enableLightMode() {
             body.className = 'min-h-screen transition-all duration-300 bg-gradient-to-br from-pink-100 to-blue-100 text-gray-900';
             navbar.className = 'shadow-lg transition-all duration-300 bg-white text-gray-900 sticky top-0 z-50';
-        }
-
-        // Search Functionality (similar to peliculas_series.php)
-        const searchInput = document.getElementById('searchInput');
-        const generoDropdown = document.getElementById('generoDropdown');
-        const mensajeError = document.getElementById('mensaje-error');
-
-        let searchTimeout;
-
-        searchInput.addEventListener('input', function() {
-            clearTimeout(searchTimeout);
-            searchTimeout = setTimeout(() => {
-                performSearch();
-            }, 300);
-        });
-
-        generoDropdown.addEventListener('change', function() {
-            performSearch();
-        });
-
-        function performSearch() {
-            const searchTerm = searchInput.value.toLowerCase().trim();
-            const selectedGenre = generoDropdown.value.toLowerCase();
             
-            if (searchTerm || selectedGenre) {
-                // Redirect to peliculas_series.php with search parameters
-                let url = 'peliculas_series.php?';
-                const params = new URLSearchParams();
-                
-                if (searchTerm) params.append('search', searchTerm);
-                if (selectedGenre) params.append('genre', selectedGenre);
-                
-                window.location.href = url + params.toString();
-            }
+            // Update all themed elements
+            updateThemedElements('light');
+            
+            // Update icons
+            document.querySelectorAll('.light-icon').forEach(el => el.classList.remove('hidden'));
+            document.querySelectorAll('.dark-icon').forEach(el => el.classList.add('hidden'));
         }
 
-        function showErrorMessage() {
-            mensajeError.classList.remove('translate-x-full');
-            mensajeError.classList.remove('opacity-0');
-            setTimeout(() => {
-                mensajeError.classList.add('translate-x-full');
-                mensajeError.classList.add('opacity-0');
-            }, 3000);
+        function updateThemedElements(theme) {
+            const isDark = theme === 'dark';
+            
+            // Update navigation links
+            const navLinks = ['nav-link-1', 'nav-link-2'];
+            navLinks.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.className = isDark 
+                        ? 'px-4 py-2 rounded-lg transition-all duration-200 hover:bg-blue-500 hover:text-white text-gray-100'
+                        : 'px-4 py-2 rounded-lg transition-all duration-200 hover:bg-blue-500 hover:text-white';
+                }
+            });
+
+            // Update theme toggle button
+            const themeBtn = document.getElementById('theme-btn');
+            if (themeBtn) {
+                themeBtn.className = isDark
+                    ? 'p-2 rounded-lg transition-colors duration-200 hover:bg-gray-700'
+                    : 'p-2 rounded-lg transition-colors duration-200 hover:bg-gray-200';
+            }
+
+            // Update profile link
+            const profileLink = document.getElementById('profile-link');
+            if (profileLink) {
+                profileLink.className = isDark
+                    ? 'flex items-center space-x-2 px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors duration-200'
+                    : 'flex items-center space-x-2 px-4 py-2 rounded-lg hover:bg-gray-100 transition-colors duration-200';
+            }
+
+            // Update user name
+            const userName = document.getElementById('user-name');
+            if (userName) {
+                userName.className = isDark
+                    ? 'hidden md:block font-medium text-gray-100'
+                    : 'hidden md:block font-medium text-gray-900';
+            }
+
+            // Update all cards
+            const cards = ['movie-card', 'filter-card', 'opinions-card', 'form-card', 'login-prompt', 'not-found'];
+            cards.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    if (isDark) {
+                        el.classList.add('bg-gray-800', 'text-white');
+                        el.classList.remove('bg-white', 'text-gray-900');
+                    } else {
+                        el.classList.add('bg-white', 'text-gray-900');
+                        el.classList.remove('bg-gray-800', 'text-white');
+                    }
+                }
+            });
+
+            // Update movie info text elements
+            const textElements = ['movie-desc', 'movie-emission', 'movie-duration', 'movie-country', 'movie-language', 'movie-episodes', 'genres-title', 'review-count'];
+            textElements.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.className = isDark
+                        ? el.className.replace('text-gray-900', 'text-gray-100')
+                        : el.className.replace('text-gray-100', 'text-gray-900');
+                }
+            });
+
+            // Update genre badges
+            const genreBadges = document.querySelectorAll('.genre-badge');
+            genreBadges.forEach(badge => {
+                if (isDark) {
+                    badge.classList.add('bg-blue-900', 'text-blue-200');
+                    badge.classList.remove('bg-blue-100', 'text-blue-800');
+                } else {
+                    badge.classList.add('bg-blue-100', 'text-blue-800');
+                    badge.classList.remove('bg-blue-900', 'text-blue-200');
+                }
+            });
+
+            // Update filter controls
+            const filterSelects = document.querySelectorAll('.filter-select');
+            filterSelects.forEach(select => {
+                if (isDark) {
+                    select.classList.add('bg-gray-700', 'border-gray-600', 'text-white');
+                    select.classList.remove('bg-white', 'border-gray-300', 'text-gray-900');
+                } else {
+                    select.classList.add('bg-white', 'border-gray-300', 'text-gray-900');
+                    select.classList.remove('bg-gray-700', 'border-gray-600', 'text-white');
+                }
+            });
+
+            // Update labels
+            const labels = ['order-label', 'rating-label', 'form-rating-label', 'form-content-label'];
+            labels.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.className = isDark
+                        ? 'block text-sm font-medium mb-1 text-gray-200'
+                        : 'block text-sm font-medium mb-1 text-gray-900';
+                }
+            });
+
+            // Update titles
+            const titles = ['filter-title', 'opinions-title', 'form-title', 'login-title', 'not-found-title'];
+            titles.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.className = isDark
+                        ? el.className.replace('text-gray-900', 'text-white')
+                        : el.className.replace('text-white', 'text-gray-900');
+                }
+            });
+
+            // Update opinion cards
+            const opinionCards = document.querySelectorAll('.opinion-card');
+            opinionCards.forEach(card => {
+                if (isDark) {
+                    card.classList.add('border-gray-700', 'bg-gray-750');
+                    card.classList.remove('border-gray-200', 'bg-white');
+                } else {
+                    card.classList.add('border-gray-200', 'bg-white');
+                    card.classList.remove('border-gray-700', 'bg-gray-750');
+                }
+            });
+
+            // Update opinion content
+            const opinionContents = document.querySelectorAll('.opinion-content');
+            opinionContents.forEach(content => {
+                if (isDark) {
+                    content.classList.add('text-gray-300');
+                    content.classList.remove('text-gray-700');
+                } else {
+                    content.classList.add('text-gray-700');
+                    content.classList.remove('text-gray-300');
+                }
+            });
+
+            // Update opinion users and dates
+            const opinionUsers = document.querySelectorAll('.opinion-user');
+            const opinionDates = document.querySelectorAll('.opinion-date');
+            [...opinionUsers, ...opinionDates].forEach(el => {
+                if (isDark) {
+                    el.classList.add('text-gray-100');
+                    el.classList.remove('text-gray-900');
+                } else {
+                    el.classList.add('text-gray-900');
+                    el.classList.remove('text-gray-100');
+                }
+            });
+
+            // Update like/dislike buttons
+            const likeButtons = document.querySelectorAll('.like-btn');
+            const dislikeButtons = document.querySelectorAll('.dislike-btn');
+            likeButtons.forEach(btn => {
+                if (isDark) {
+                    btn.classList.add('hover:bg-green-900/20');
+                    btn.classList.remove('hover:bg-green-50');
+                } else {
+                    btn.classList.add('hover:bg-green-50');
+                    btn.classList.remove('hover:bg-green-900/20');
+                }
+            });
+            dislikeButtons.forEach(btn => {
+                if (isDark) {
+                    btn.classList.add('hover:bg-red-900/20');
+                    btn.classList.remove('hover:bg-red-50');
+                } else {
+                    btn.classList.add('hover:bg-red-50');
+                    btn.classList.remove('hover:bg-red-900/20');
+                }
+            });
+
+            // Update edit/delete buttons
+            const editButtons = document.querySelectorAll('.edit-btn');
+            const deleteButtons = document.querySelectorAll('.delete-btn');
+            editButtons.forEach(btn => {
+                if (isDark) {
+                    btn.classList.add('hover:bg-blue-900/20');
+                    btn.classList.remove('hover:bg-blue-50');
+                } else {
+                    btn.classList.add('hover:bg-blue-50');
+                    btn.classList.remove('hover:bg-blue-900/20');
+                }
+            });
+            deleteButtons.forEach(btn => {
+                if (isDark) {
+                    btn.classList.add('hover:bg-red-900/20');
+                    btn.classList.remove('hover:bg-red-50');
+                } else {
+                    btn.classList.add('hover:bg-red-50');
+                    btn.classList.remove('hover:bg-red-900/20');
+                }
+            });
+
+            // Update no opinions section
+            const noOpinionsTitle = document.querySelector('.no-opinions-title');
+            const noOpinionsText = document.querySelector('.no-opinions-text');
+            if (noOpinionsTitle) {
+                noOpinionsTitle.className = isDark
+                    ? 'text-xl font-semibold mb-2 text-gray-300'
+                    : 'text-xl font-semibold mb-2 text-gray-600';
+            }
+            if (noOpinionsText) {
+                noOpinionsText.className = isDark
+                    ? 'text-gray-400'
+                    : 'text-gray-500';
+            }
+
+            // Update form elements
+            const formSelect = document.querySelector('.form-select');
+            const formTextarea = document.querySelector('.form-textarea');
+            [formSelect, formTextarea].forEach(el => {
+                if (el) {
+                    if (isDark) {
+                        el.classList.add('bg-gray-700', 'border-gray-600', 'text-white');
+                        el.classList.remove('bg-white', 'border-gray-300', 'text-gray-900');
+                    } else {
+                        el.classList.add('bg-white', 'border-gray-300', 'text-gray-900');
+                        el.classList.remove('bg-gray-700', 'border-gray-600', 'text-white');
+                    }
+                }
+            });
+
+            // Update login text
+            const loginText = document.getElementById('login-text');
+            if (loginText) {
+                loginText.className = isDark
+                    ? 'mb-6 text-gray-400'
+                    : 'mb-6 text-gray-600';
+            }
+
+            // Update not found text
+            const notFoundText = document.getElementById('not-found-text');
+            if (notFoundText) {
+                notFoundText.className = isDark
+                    ? 'mb-8 text-gray-400'
+                    : 'mb-8 text-gray-500';
+            }
         }
 
         // Like/Dislike System - Client-side only with localStorage
@@ -561,13 +740,15 @@ $stmt->close();
             let likeValue = parseInt(likeCount.textContent);
             let dislikeValue = parseInt(dislikeCount.textContent);
 
+            const isDark = body.classList.contains('dark');
+
             // Remove previous reaction if exists
             if (currentReaction === 'like') {
                 likeValue--;
-                likeBtn.classList.remove('bg-green-100', 'dark:bg-green-900/50');
+                likeBtn.classList.remove('bg-green-100', 'dark:bg-green-900/50', 'bg-green-900/50');
             } else if (currentReaction === 'dislike') {
                 dislikeValue--;
-                dislikeBtn.classList.remove('bg-red-100', 'dark:bg-red-900/50');
+                dislikeBtn.classList.remove('bg-red-100', 'dark:bg-red-900/50', 'bg-red-900/50');
             }
 
             // Apply new reaction or remove if same
@@ -576,10 +757,10 @@ $stmt->close();
                 
                 if (action === 'like') {
                     likeValue++;
-                    likeBtn.classList.add('bg-green-100', 'dark:bg-green-900/50');
+                    likeBtn.classList.add(isDark ? 'bg-green-900/50' : 'bg-green-100');
                 } else {
                     dislikeValue++;
-                    dislikeBtn.classList.add('bg-red-100', 'dark:bg-red-900/50');
+                    dislikeBtn.classList.add(isDark ? 'bg-red-900/50' : 'bg-red-100');
                 }
             } else {
                 delete userReactions[reactionKey];
@@ -609,6 +790,7 @@ $stmt->close();
         // Initialize reactions on page load
         document.addEventListener('DOMContentLoaded', function() {
             if (userId) {
+                const isDark = body.classList.contains('dark');
                 Object.keys(userReactions).forEach(key => {
                     const [uId, opId] = key.split('-');
                     if (parseInt(uId) === userId) {
@@ -616,9 +798,9 @@ $stmt->close();
                         const btn = document.getElementById(`${reaction}-btn-${opId}`);
                         if (btn) {
                             if (reaction === 'like') {
-                                btn.classList.add('bg-green-100', 'dark:bg-green-900/50');
+                                btn.classList.add(isDark ? 'bg-green-900/50' : 'bg-green-100');
                             } else {
-                                btn.classList.add('bg-red-100', 'dark:bg-red-900/50');
+                                btn.classList.add(isDark ? 'bg-red-900/50' : 'bg-red-100');
                             }
                         }
                     }

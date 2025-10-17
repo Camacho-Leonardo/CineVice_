@@ -123,6 +123,11 @@ $profile_image_path = !empty($usuario['imagen']) ? '../uploads/avatars/' . $usua
                         <a href="../foros.php" class="px-4 py-2 rounded-lg transition-all duration-200 hover:bg-blue-500 hover:text-white">
                             Foros
                         </a>
+                        <?php if ($usuario['rol_id'] == 1): ?>
+                        <a href="admin_panel.php" class="px-4 py-2 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 text-white font-medium transition-all duration-200 hover:scale-105 hover:shadow-lg">
+                            👑 Panel Admin
+                        </a>
+                        <?php endif; ?>
                     </div>
                 </div>
 
@@ -138,7 +143,13 @@ $profile_image_path = !empty($usuario['imagen']) ? '../uploads/avatars/' . $usua
                     <div class="flex items-center space-x-2">
                         <img id="navProfileImage" src="<?php echo $profile_image_path; ?>" alt="Avatar" 
                              class="w-8 h-8 rounded-full object-cover border-2 border-blue-400">
-                        <span class="hidden md:block font-medium"><?php echo htmlspecialchars($usuario['nombre']); ?></span>
+                        <span class="hidden md:block font-medium">
+                            <?php if ($usuario['rol_id'] == 1): ?>
+                                👑 <?php echo htmlspecialchars($usuario['nombre']); ?>
+                            <?php else: ?>
+                                <?php echo htmlspecialchars($usuario['nombre']); ?>
+                            <?php endif; ?>
+                        </span>
                     </div>
                     
                     <!-- Logout Button -->
@@ -185,7 +196,13 @@ $profile_image_path = !empty($usuario['imagen']) ? '../uploads/avatars/' . $usua
 
                     <!-- User Info -->
                     <div class="text-center">
-                        <h2 class="text-2xl font-bold mb-4">👋 Bienvenido, <?php echo htmlspecialchars($usuario['nombre']); ?></h2>
+                        <h2 class="text-2xl font-bold mb-4">
+                            <?php if ($usuario['rol_id'] == 1): ?>
+                                👑 Bienvenido Admin, <?php echo htmlspecialchars($usuario['nombre']); ?>
+                            <?php else: ?>
+                                👋 Bienvenido, <?php echo htmlspecialchars($usuario['nombre']); ?>
+                            <?php endif; ?>
+                        </h2>
                         
                         <!-- Email with privacy toggle -->
                         <div class="mb-4">
@@ -199,6 +216,16 @@ $profile_image_path = !empty($usuario['imagen']) ? '../uploads/avatars/' . $usua
                                 </div>
                             </div>
                         </div>
+
+                        <?php if ($usuario['rol_id'] == 1): ?>
+                        <!-- Admin Quick Access Button -->
+                        <div class="mt-6">
+                            <a href="admin_panel.php" class="block w-full px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl font-bold hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl">
+                                <i data-feather="settings" class="w-5 h-5 inline mr-2"></i>
+                                Acceder al Panel de Administración
+                            </a>
+                        </div>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>

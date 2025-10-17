@@ -51,27 +51,28 @@ $foros_result = $stmt->get_result();
     <title>Foros - CineVice</title>
     <link href="../../src/output.css" rel="stylesheet">
     <link rel="icon" type="image/x-icon" href="./Imágenes/c-logo.png">
-    <style>
-        .bg-cinevice-pink { background-color: #E879A5; }
-        .bg-cinevice-blue { background-color: #7DD3FC; }
-        .text-cinevice-pink { color: #E879A5; }
-        .text-cinevice-blue { color: #7DD3FC; }
-        .border-cinevice-pink { border-color: #E879A5; }
-        .border-cinevice-blue { border-color: #7DD3FC; }
-        .hover\:bg-cinevice-pink:hover { background-color: #E879A5; }
-        .hover\:bg-cinevice-blue:hover { background-color: #7DD3FC; }
-    </style>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
 </head>
-<body class="bg-gray-100 min-h-screen">
+<body class="min-h-screen transition-all duration-300" id="body">
     <!-- Navbar -->
-    <nav class="bg-white shadow-lg border-b-2 border-cinevice-pink">
+    <nav class="shadow-lg transition-all duration-300 border-b-2" id="navbar">
         <div class="max-w-7xl mx-auto px-4">
             <div class="flex justify-between items-center h-16">
                 <!-- Logo -->
-                <div class="flex items-center">
-                    <a href="../../index.php" class="flex items-center space-x-2">
-                        <img src="./Imágenes/cine-vice-navbar.png" alt="CineVice" class="h-10">
+                <div class="flex items-center space-x-4">
+                    <a href="../../index.php" class="group">
+                        <h1 class="text-3xl font-black bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 bg-clip-text text-transparent hover:scale-105 transition-transform duration-300">
+                            CINE<span class="text-blue-400">VICE</span>
+                        </h1>
                     </a>
+                    <div class="hidden md:flex space-x-2 ml-8">
+                        <a href="peliculas_series.php" class="px-4 py-2 rounded-lg transition-all duration-200 hover:bg-blue-500 hover:text-white">
+                            Películas/Series
+                        </a>
+                        <a href="foros.php" class="px-4 py-2 rounded-lg transition-all duration-200 bg-blue-500 text-white">
+                            Foros
+                        </a>
+                    </div>
                 </div>
 
                 <!-- Buscador -->
@@ -81,33 +82,35 @@ $foros_result = $stmt->get_result();
                                id="searchInput" 
                                placeholder="Buscar foros..." 
                                value="<?= htmlspecialchars($search) ?>"
-                               class="w-full px-4 py-2 pl-10 pr-4 border-2 border-cinevice-pink rounded-full focus:outline-none focus:ring-2 focus:ring-cinevice-blue">
+                               class="w-full px-4 py-2 pl-10 pr-4 border-2 rounded-full focus:outline-none focus:ring-2 transition-colors duration-200" style="border-color: #E879A5;">
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center">
-                            <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                            </svg>
+                            <i data-feather="search" class="w-5 h-5 text-gray-400"></i>
                         </div>
                         <!-- Sugerencias de búsqueda -->
-                        <div id="searchSuggestions" class="absolute z-10 w-full bg-white border border-gray-300 rounded-md mt-1 hidden shadow-lg max-h-60 overflow-y-auto"></div>
+                        <div id="searchSuggestions" class="absolute z-10 w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md mt-1 hidden shadow-lg max-h-60 overflow-y-auto"></div>
                     </div>
                 </div>
 
                 <!-- Usuario -->
                 <div class="flex items-center space-x-4">
+                    <!-- Theme Toggle -->
+                    <button id="themeToggle" class="p-2 rounded-lg transition-colors duration-200 hover:bg-gray-200 dark:hover:bg-gray-700">
+                        <i data-feather="sun" class="w-5 h-5 hidden dark:block"></i>
+                        <i data-feather="moon" class="w-5 h-5 block dark:hidden"></i>
+                    </button>
+
                     <?php if (isset($_SESSION['usuario'])): ?>
-                        <span class="text-gray-700">Hola, 
-                            <a href="perfil.php" class="text-cinevice-pink hover:text-cinevice-blue font-semibold">
-                                <?= htmlspecialchars($_SESSION['usuario']['nombre']) ?>
-                            </a>
-                        </span>
-                        <a href="logout.php" class="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition">
+                        <a href="Páginas/perfil.php" class="font-semibold hover:text-blue-500 transition-colors duration-200">
+                            Hola, <?= htmlspecialchars($_SESSION['usuario']['nombre']) ?>
+                        </a>
+                        <a href="logout.php" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors duration-200">
                             Cerrar Sesión
                         </a>
                     <?php else: ?>
-                        <a href="Páginas/formularios.php?inicio" class="text-cinevice-pink hover:text-cinevice-blue">
+                        <a href="Páginas/formularios.php?inicio" class="hover:text-blue-500 transition-colors duration-200">
                             Iniciar Sesión
                         </a>
-                        <a href="Páginas/formularios.php?registro" class="bg-cinevice-pink text-white px-4 py-2 rounded-md hover:bg-cinevice-blue transition">
+                        <a href="Páginas/formularios.php?registro" class="px-4 py-2 bg-gradient-to-r from-pink-500 to-blue-500 text-white rounded-lg hover:opacity-90 transition-opacity duration-200">
                             Registrarse
                         </a>
                     <?php endif; ?>
@@ -117,36 +120,49 @@ $foros_result = $stmt->get_result();
     </nav>
 
     <div class="max-w-7xl mx-auto px-4 py-8">
+        <!-- Mensajes de éxito/error -->
+        <?php if (isset($_GET['deleted'])): ?>
+            <?php if ($_GET['deleted'] == 'success'): ?>
+                <div class="mb-6 p-4 bg-green-100 dark:bg-green-900 border border-green-400 dark:border-green-600 text-green-700 dark:text-green-200 rounded-lg flex items-center space-x-2">
+                    <i data-feather="check-circle" class="w-5 h-5"></i>
+                    <span>Foro eliminado correctamente</span>
+                </div>
+            <?php else: ?>
+                <div class="mb-6 p-4 bg-red-100 dark:bg-red-900 border border-red-400 dark:border-red-600 text-red-700 dark:text-red-200 rounded-lg flex items-center space-x-2">
+                    <i data-feather="alert-circle" class="w-5 h-5"></i>
+                    <span>Error al eliminar el foro</span>
+                </div>
+            <?php endif; ?>
+        <?php endif; ?>
+
         <!-- Header -->
         <div class="flex justify-between items-center mb-8">
             <div>
-                <h1 class="text-4xl font-bold text-gray-900 mb-2">
-                    Foros de <span class="text-cinevice-pink">Cine</span><span class="text-cinevice-blue">Vice</span>
+                <h1 class="text-4xl font-bold mb-2">
+                    Foros de <span class="bg-gradient-to-r from-pink-500 to-blue-500 bg-clip-text text-transparent">CineVice</span>
                 </h1>
-                <p class="text-gray-600">Discute tus películas y series favoritas con la comunidad</p>
+                <p class="opacity-70">Discute tus películas y series favoritas con la comunidad</p>
             </div>
             
             <?php if (isset($_SESSION['usuario'])): ?>
-                <button onclick="openCreateModal()" class="bg-cinevice-pink text-white px-6 py-3 rounded-lg hover:bg-cinevice-blue transition duration-300 flex items-center space-x-2">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                    </svg>
+                <button onclick="openCreateModal()" class="px-6 py-3 bg-gradient-to-r from-pink-500 to-blue-500 text-white rounded-lg hover:opacity-90 transition-opacity duration-300 flex items-center space-x-2 shadow-lg hover:shadow-xl">
+                    <i data-feather="plus" class="w-5 h-5"></i>
                     <span>Crear Foro</span>
                 </button>
             <?php endif; ?>
         </div>
 
         <!-- Filtros -->
-        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
-            <h3 class="text-lg font-semibold text-gray-900 mb-4">Filtrar por género</h3>
+        <div class="rounded-lg shadow-md p-6 mb-8 transition-all duration-300" id="filtersCard">
+            <h3 class="text-lg font-semibold mb-4">Filtrar por género</h3>
             <div class="flex flex-wrap gap-2">
                 <a href="?<?= http_build_query(array_filter(['search' => $search])) ?>" 
-                   class="<?= $genero_filter == 0 ? 'bg-cinevice-pink text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300' ?> px-4 py-2 rounded-full transition">
+                   class="<?= $genero_filter == 0 ? 'bg-gradient-to-r from-pink-500 to-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600' ?> px-4 py-2 rounded-full transition-all duration-200">
                     Todos
                 </a>
                 <?php while ($genero = $generos_result->fetch_assoc()): ?>
                     <a href="?<?= http_build_query(array_filter(['search' => $search, 'genero' => $genero['gen_id']])) ?>" 
-                       class="<?= $genero_filter == $genero['gen_id'] ? 'bg-cinevice-blue text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300' ?> px-4 py-2 rounded-full transition">
+                       class="<?= $genero_filter == $genero['gen_id'] ? 'bg-gradient-to-r from-pink-500 to-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600' ?> px-4 py-2 rounded-full transition-all duration-200">
                         <?= htmlspecialchars($genero['nombre']) ?>
                     </a>
                 <?php endwhile; ?>
@@ -157,63 +173,68 @@ $foros_result = $stmt->get_result();
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <?php if ($foros_result->num_rows > 0): ?>
                 <?php while ($foro = $foros_result->fetch_assoc()): ?>
-                    <div class="bg-white rounded-lg shadow-md hover:shadow-lg transition duration-300 overflow-hidden">
+                    <div class="rounded-lg shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden" id="foroCard">
                         <?php if (!empty($foro['imagen'])): ?>
                             <img src="./uploads/foros/<?= htmlspecialchars($foro['imagen']) ?>" 
                                  alt="Imagen del foro" 
                                  class="w-full h-48 object-cover">
                         <?php else: ?>
-                            <div class="w-full h-48 bg-gradient-to-br from-cinevice-pink to-cinevice-blue flex items-center justify-center">
-                                <svg class="w-16 h-16 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
-                                </svg>
+                            <div class="w-full h-48 bg-gradient-to-br from-pink-500 via-purple-500 to-blue-500 flex items-center justify-center">
+                                <i data-feather="message-circle" class="w-16 h-16 text-white"></i>
                             </div>
                         <?php endif; ?>
                         
                         <div class="p-6">
                             <div class="flex items-center justify-between mb-2">
-                                <h3 class="text-xl font-semibold text-gray-900 truncate">
+                                <h3 class="text-xl font-semibold truncate flex-1">
                                     <?= htmlspecialchars($foro['nombre']) ?>
                                 </h3>
                                 <?php if ($foro['genero_nombre']): ?>
-                                    <span class="bg-cinevice-blue text-white text-xs px-2 py-1 rounded-full">
+                                    <span class="bg-blue-500 text-white text-xs px-2 py-1 rounded-full ml-2">
                                         <?= htmlspecialchars($foro['genero_nombre']) ?>
                                     </span>
                                 <?php endif; ?>
                             </div>
                             
-                            <p class="text-gray-600 text-sm mb-4 line-clamp-3">
+                            <p class="text-sm mb-4 line-clamp-3 opacity-80">
                                 <?= htmlspecialchars($foro['descripcion']) ?>
                             </p>
                             
-                            <div class="flex items-center justify-between text-sm text-gray-500 mb-4">
+                            <div class="flex items-center justify-between text-sm opacity-70 mb-4">
                                 <span>Por <?= htmlspecialchars($foro['usuario_nombre']) ?></span>
                                 <span><?= date('d/m/Y', strtotime($foro['creacion'])) ?></span>
                             </div>
                             
                             <div class="flex items-center justify-between">
-                                <span class="flex items-center text-sm text-gray-500">
-                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
-                                    </svg>
+                                <span class="flex items-center text-sm opacity-70">
+                                    <i data-feather="message-square" class="w-4 h-4 mr-1"></i>
                                     <?= $foro['total_comentarios'] ?> comentarios
                                 </span>
                                 
-                                <a href="foro_detalle.php?id=<?= $foro['foro_id'] ?>" 
-                                   class="bg-cinevice-pink text-white px-4 py-2 rounded-md hover:bg-cinevice-blue transition">
-                                    Entrar al Foro
-                                </a>
+                                <div class="flex space-x-2">
+                                    <a href="foro_detalle.php?id=<?= $foro['foro_id'] ?>" 
+                                       class="px-4 py-2 bg-gradient-to-r from-pink-500 to-blue-500 text-white rounded-md hover:opacity-90 transition-opacity duration-200 flex items-center space-x-1">
+                                        <span>Entrar</span>
+                                        <i data-feather="arrow-right" class="w-4 h-4"></i>
+                                    </a>
+                                    
+                                    <?php if (isset($_SESSION['usuario']) && $_SESSION['usuario']['id'] == $foro['usu_id']): ?>
+                                        <button onclick="confirmDelete(<?= $foro['foro_id'] ?>, '<?= htmlspecialchars(addslashes($foro['nombre'])) ?>')" 
+                                                class="px-3 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors duration-200 flex items-center justify-center"
+                                                title="Eliminar foro">
+                                            <i data-feather="trash-2" class="w-4 h-4"></i>
+                                        </button>
+                                    <?php endif; ?>
+                                </div>
                             </div>
                         </div>
                     </div>
                 <?php endwhile; ?>
             <?php else: ?>
                 <div class="col-span-full text-center py-12">
-                    <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
-                    </svg>
-                    <h3 class="text-xl font-semibold text-gray-900 mb-2">No hay foros disponibles</h3>
-                    <p class="text-gray-600">
+                    <i data-feather="message-circle" class="w-16 h-16 mx-auto mb-4 opacity-50"></i>
+                    <h3 class="text-xl font-semibold mb-2">No hay foros disponibles</h3>
+                    <p class="opacity-70">
                         <?php if (empty($search) && $genero_filter == 0): ?>
                             Sé el primero en crear un foro para discutir películas y series.
                         <?php else: ?>
@@ -228,27 +249,25 @@ $foros_result = $stmt->get_result();
     <!-- Modal Crear Foro -->
     <?php if (isset($_SESSION['usuario'])): ?>
     <div id="createModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-lg max-w-md w-full p-6">
+        <div class="rounded-lg max-w-md w-full p-6 transition-all duration-300" id="modalCard">
             <div class="flex justify-between items-center mb-4">
-                <h2 class="text-2xl font-bold text-gray-900">Crear Nuevo Foro</h2>
-                <button onclick="closeCreateModal()" class="text-gray-400 hover:text-gray-600">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                    </svg>
+                <h2 class="text-2xl font-bold">Crear Nuevo Foro</h2>
+                <button onclick="closeCreateModal()" class="hover:opacity-70 transition-opacity duration-200">
+                    <i data-feather="x" class="w-6 h-6"></i>
                 </button>
             </div>
             
             <form action="crear_foro.php" method="POST" enctype="multipart/form-data">
                 <div class="space-y-4">
                     <div>
-                        <label for="nombre" class="block text-sm font-medium text-gray-700 mb-1">Nombre del Foro</label>
+                        <label for="nombre" class="block text-sm font-medium mb-1">Nombre del Foro</label>
                         <input type="text" id="nombre" name="nombre" required maxlength="50"
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cinevice-pink">
+                               class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500 transition-all duration-200 dark:bg-gray-700 dark:border-gray-600">
                     </div>
                     
                     <div>
-                        <label for="genero_id" class="block text-sm font-medium text-gray-700 mb-1">Género</label>
-                        <select id="genero_id" name="genero_id" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cinevice-pink">
+                        <label for="genero_id" class="block text-sm font-medium mb-1">Género</label>
+                        <select id="genero_id" name="genero_id" class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500 transition-all duration-200 dark:bg-gray-700 dark:border-gray-600">
                             <option value="">Seleccionar género (opcional)</option>
                             <?php
                             $generos_result->data_seek(0);
@@ -259,25 +278,25 @@ $foros_result = $stmt->get_result();
                     </div>
                     
                     <div>
-                        <label for="descripcion" class="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
+                        <label for="descripcion" class="block text-sm font-medium mb-1">Descripción</label>
                         <textarea id="descripcion" name="descripcion" required maxlength="500" rows="3"
-                                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cinevice-pink"></textarea>
+                                  class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500 transition-all duration-200 dark:bg-gray-700 dark:border-gray-600"></textarea>
                     </div>
                     
                     <div>
-                        <label for="imagen" class="block text-sm font-medium text-gray-700 mb-1">Imagen (opcional)</label>
+                        <label for="imagen" class="block text-sm font-medium mb-1">Imagen (opcional)</label>
                         <input type="file" id="imagen" name="imagen" accept="image/*"
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cinevice-pink">
+                               class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500 transition-all duration-200 dark:bg-gray-700 dark:border-gray-600">
                     </div>
                 </div>
                 
                 <div class="flex space-x-3 mt-6">
                     <button type="button" onclick="closeCreateModal()" 
-                            class="flex-1 px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition">
+                            class="flex-1 px-4 py-2 border rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200">
                         Cancelar
                     </button>
                     <button type="submit" 
-                            class="flex-1 px-4 py-2 bg-cinevice-pink text-white rounded-md hover:bg-cinevice-blue transition">
+                            class="flex-1 px-4 py-2 bg-gradient-to-r from-pink-500 to-blue-500 text-white rounded-md hover:opacity-90 transition-opacity duration-200">
                         Crear Foro
                     </button>
                 </div>
@@ -286,14 +305,110 @@ $foros_result = $stmt->get_result();
     </div>
     <?php endif; ?>
 
+    <!-- Modal Confirmar Eliminación -->
+    <div id="deleteModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+        <div class="rounded-lg max-w-md w-full p-6 transition-all duration-300" id="deleteModalCard">
+            <div class="flex items-center space-x-3 mb-4">
+                <i data-feather="alert-triangle" class="w-6 h-6 text-red-500"></i>
+                <h2 class="text-2xl font-bold">Confirmar Eliminación</h2>
+            </div>
+            
+            <p class="mb-6 opacity-80">¿Estás seguro de que deseas eliminar el foro "<span id="foroNombre" class="font-semibold"></span>"? Esta acción no se puede deshacer.</p>
+            
+            <div class="flex space-x-3">
+                <button onclick="closeDeleteModal()" 
+                        class="flex-1 px-4 py-2 border rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200">
+                    Cancelar
+                </button>
+                <button onclick="deleteForo()" 
+                        class="flex-1 px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors duration-200">
+                    Eliminar
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script>
-        // Funciones del modal
+        // Initialize Feather Icons
+        feather.replace();
+
+        // Theme Toggle
+        const themeToggle = document.getElementById('themeToggle');
+        const body = document.getElementById('body');
+        const navbar = document.getElementById('navbar');
+        const filtersCard = document.getElementById('filtersCard');
+        const modalCard = document.getElementById('modalCard');
+        const deleteModalCard = document.getElementById('deleteModalCard');
+
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        if (savedTheme === 'dark') {
+            enableDarkMode();
+        } else {
+            enableLightMode();
+        }
+
+        themeToggle.addEventListener('click', () => {
+            if (body.classList.contains('dark')) {
+                enableLightMode();
+                localStorage.setItem('theme', 'light');
+            } else {
+                enableDarkMode();
+                localStorage.setItem('theme', 'dark');
+            }
+            feather.replace();
+        });
+
+        function enableDarkMode() {
+            body.className = 'min-h-screen transition-all duration-300 dark bg-gray-900 text-white';
+            navbar.className = 'shadow-lg transition-all duration-300 border-b-2 bg-gray-800 text-white border-gray-700';
+            filtersCard.className = 'rounded-lg shadow-md p-6 mb-8 transition-all duration-300 bg-gray-800 text-white';
+            modalCard.className = 'rounded-lg max-w-md w-full p-6 transition-all duration-300 bg-gray-800 text-white';
+            deleteModalCard.className = 'rounded-lg max-w-md w-full p-6 transition-all duration-300 bg-gray-800 text-white';
+            
+            document.querySelectorAll('#foroCard').forEach(card => {
+                card.className = 'rounded-lg shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden bg-gray-800 text-white';
+            });
+        }
+
+        function enableLightMode() {
+            body.className = 'min-h-screen transition-all duration-300 bg-gradient-to-br from-pink-100 to-blue-100 text-gray-900';
+            navbar.className = 'shadow-lg transition-all duration-300 border-b-2 bg-white text-gray-900 border-pink-300';
+            filtersCard.className = 'rounded-lg shadow-md p-6 mb-8 transition-all duration-300 bg-white text-gray-900';
+            modalCard.className = 'rounded-lg max-w-md w-full p-6 transition-all duration-300 bg-white text-gray-900';
+            deleteModalCard.className = 'rounded-lg max-w-md w-full p-6 transition-all duration-300 bg-white text-gray-900';
+            
+            document.querySelectorAll('#foroCard').forEach(card => {
+                card.className = 'rounded-lg shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden bg-white text-gray-900';
+            });
+        }
+
+        // Funciones del modal crear
         function openCreateModal() {
             document.getElementById('createModal').classList.remove('hidden');
         }
         
         function closeCreateModal() {
             document.getElementById('createModal').classList.add('hidden');
+        }
+
+        // Funciones del modal eliminar
+        let foroToDelete = null;
+
+        function confirmDelete(foroId, foroNombre) {
+            foroToDelete = foroId;
+            document.getElementById('foroNombre').textContent = foroNombre;
+            document.getElementById('deleteModal').classList.remove('hidden');
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('deleteModal').classList.add('hidden');
+            foroToDelete = null;
+        }
+
+        function deleteForo() {
+            if (foroToDelete) {
+                window.location.href = `eliminar_foro.php?id=${foroToDelete}`;
+            }
         }
 
         // Búsqueda con sugerencias
@@ -312,12 +427,16 @@ $foros_result = $stmt->get_result();
                         .then(data => {
                             if (data.length > 0) {
                                 searchSuggestions.innerHTML = data.map(foro => 
-                                    `<div class="px-4 py-2 hover:bg-gray-100 cursor-pointer border-b" onclick="selectSuggestion('${foro.nombre}')">${foro.nombre}</div>`
+                                    `<div class="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer border-b dark:border-gray-600" onclick="selectSuggestion('${foro.nombre.replace(/'/g, "\\'")}')">${foro.nombre}</div>`
                                 ).join('');
                                 searchSuggestions.classList.remove('hidden');
                             } else {
                                 searchSuggestions.classList.add('hidden');
                             }
+                        })
+                        .catch(error => {
+                            console.error('Error al buscar foros:', error);
+                            searchSuggestions.classList.add('hidden');
                         });
                 }, 300);
             } else {
@@ -331,19 +450,38 @@ $foros_result = $stmt->get_result();
             window.location.href = `?search=${encodeURIComponent(name)}`;
         }
 
-        // Ocultar sugerencias al hacer click fuera
         document.addEventListener('click', function(event) {
             if (!searchInput.contains(event.target) && !searchSuggestions.contains(event.target)) {
                 searchSuggestions.classList.add('hidden');
             }
         });
 
-        // Enviar búsqueda al presionar Enter
         searchInput.addEventListener('keypress', function(event) {
             if (event.key === 'Enter') {
                 window.location.href = `?search=${encodeURIComponent(this.value)}`;
             }
         });
+
+        // Cerrar modales con ESC
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeCreateModal();
+                closeDeleteModal();
+            }
+        });
+
+        // Auto-cerrar mensajes de éxito/error después de 5 segundos
+        setTimeout(() => {
+            const alerts = document.querySelectorAll('.bg-green-100, .bg-red-100');
+            alerts.forEach(alert => {
+                alert.style.transition = 'opacity 0.5s';
+                alert.style.opacity = '0';
+                setTimeout(() => alert.remove(), 500);
+            });
+        }, 5000);
+
+        // Refresh icons after theme change and page load
+        feather.replace();
     </script>
 </body>
 </html>

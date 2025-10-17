@@ -1,58 +1,96 @@
 <?php
 session_start();
 require_once("../conexion.php");
-require './vendor/autoload.php'; // PHPMailer
+require './vendor/autoload.php';
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
+
+function mostrarNavbar() {
+    echo '
+    <nav class="bg-black/50 backdrop-blur-md border-b border-purple-500/30 sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-4">
+            <a href="../../../index.php" class="group inline-block">
+                <h1 class="text-3xl font-black bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 bg-clip-text text-transparent hover:scale-105 transition-transform duration-300">
+                    CINE<span class="text-blue-400">VICE</span>
+                </h1>
+            </a>
+        </div>
+    </nav>';
+}
+
+function mostrarHeader($titulo) {
+    echo '<!DOCTYPE html>
+    <html lang="es">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>' . $titulo . ' - CineVice</title>
+        <link rel="icon" type="image/png" href="../../../C-logo.png">
+        <link href="../../../src/output.css" rel="stylesheet">
+    </head>
+    <body class="bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 min-h-screen">';
+    mostrarNavbar();
+}
 
 // LOGIN
 if (isset($_POST['inicioUsu'])) {
     $email = $_POST['email'];
     $password = $_POST['password'];
 
-    // DEBUG: Mostrar qué datos llegan
-    echo "<!-- DEBUG: Email recibido: " . htmlspecialchars($email) . " -->";
-    echo "<!-- DEBUG: Password recibido: " . htmlspecialchars($password) . " -->";
-
-    // Primero verificamos si el usuario existe
     $stmt = $conexion->prepare("SELECT * FROM usuarios WHERE email = ? AND est_id = 1");
     $stmt->bind_param("s", $email);
     $stmt->execute();
     $resultado = $stmt->get_result();
     $num_rows = $resultado->num_rows;
     
-    // DEBUG: Mostrar cuántas filas se encontraron
-    echo "<!-- DEBUG: Filas encontradas: " . $num_rows . " -->";
-    
     if ($num_rows === 0) {
-        // El correo no está registrado
         $stmt->close();
-        echo "<h2 style='color:red; text-align:center;'>❌ Correo no registrado</h2>";
-        echo "<p style='text-align:center;'>No existe una cuenta registrada con el correo: <strong>" . htmlspecialchars($email) . "</strong></p>";
-        echo "<p style='text-align:center;'>";
-        echo "<a href='formularios.php?registro'><button style='margin:5px; padding:8px 15px; background:#28a745; color:white; border:none; border-radius:5px; cursor:pointer;'>¿No tienes cuenta? Regístrate</button></a> ";
-        echo "<a href='formularios.php?inicio'><button style='margin:5px; padding:8px 15px; background:#007bff; color:white; border:none; border-radius:5px; cursor:pointer;'>Volver a intentar</button></a>";
-        echo "</p>";
+        mostrarHeader('Correo no registrado');
+        echo '
+        <div class="container mx-auto px-4 py-16">
+            <div class="max-w-md mx-auto bg-gray-800/80 backdrop-blur-lg rounded-2xl shadow-2xl border border-purple-500/30 p-8">
+                <div class="text-center mb-6">
+                    <div class="inline-block p-4 bg-red-500/20 rounded-full mb-4">
+                        <svg class="w-16 h-16 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <h2 class="text-3xl font-bold text-red-400 mb-3">Correo no registrado</h2>
+                    <p class="text-gray-300 mb-2">No existe una cuenta registrada con el correo:</p>
+                    <p class="text-purple-400 font-semibold text-lg">' . htmlspecialchars($email) . '</p>
+                </div>
+                <div class="space-y-3 mt-8">
+                    <a href="formularios.php?registro" class="block">
+                        <button class="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg">
+                            ¿No tienes cuenta? Regístrate
+                        </button>
+                    </a>
+                    <a href="formularios.php?inicio" class="block">
+                        <button class="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg">
+                            Volver a intentar
+                        </button>
+                    </a>
+                </div>
+            </div>
+        </div>
+        </body>
+        </html>';
+        exit;
     } else {
-        // El usuario existe, verificar contraseña
         $usuario = $resultado->fetch_assoc();
         $stmt->close();
         
-        // DEBUG: Mostrar la contraseña almacenada (solo para debugging)
-        echo "<!-- DEBUG: Contraseña en BD: " . htmlspecialchars($usuario['clave']) . " -->";
-        echo "<!-- DEBUG: Contraseñas coinciden: " . ($password === $usuario['clave'] ? 'SÍ' : 'NO') . " -->";
-        
         if ($password === $usuario['clave']) {
-            // Contraseña correcta, iniciar sesión
+            // ✅ CORRECCIÓN: Ahora se incluye el rol_id en la sesión
             $_SESSION['usuario'] = [
                 'id' => $usuario['usu_id'],
                 'nombre' => $usuario['nombre'],
                 'email' => $usuario['email'],
+                'rol_id' => $usuario['rol_id'],  // ← AGREGADO
                 'imagen' => $usuario['imagen']
             ];
 
-            // Si la contraseña enviada coincide con la temporal que se generó, marcamos la sesión
             if (isset($_SESSION['temporal_pass']) && $password === $_SESSION['temporal_pass']) {
                 $_SESSION['temporal'] = true;
             }
@@ -60,17 +98,39 @@ if (isset($_POST['inicioUsu'])) {
             header("Location: perfil.php");
             exit;
         } else {
-            // Usuario existe pero contraseña incorrecta
-            echo "<h2 style='color:red; text-align:center;'>🔒 Contraseña incorrecta</h2>";
-            echo "<p style='text-align:center;'>El correo es correcto, pero la contraseña no coincide.</p>";
-            echo "<p style='text-align:center;'>";
-            echo "<a href='formularios.php?recuperar'><button style='margin:5px; padding:8px 15px; background:#ffc107; color:black; border:none; border-radius:5px; cursor:pointer;'>¿Olvidaste tu contraseña?</button></a> ";
-            echo "<a href='formularios.php?inicio'><button style='margin:5px; padding:8px 15px; background:#007bff; color:white; border:none; border-radius:5px; cursor:pointer;'>Volver a intentar</button></a>";
-            echo "</p>";
+            mostrarHeader('Contraseña incorrecta');
+            echo '
+            <div class="container mx-auto px-4 py-16">
+                <div class="max-w-md mx-auto bg-gray-800/80 backdrop-blur-lg rounded-2xl shadow-2xl border border-purple-500/30 p-8">
+                    <div class="text-center mb-6">
+                        <div class="inline-block p-4 bg-yellow-500/20 rounded-full mb-4">
+                            <svg class="w-16 h-16 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                            </svg>
+                        </div>
+                        <h2 class="text-3xl font-bold text-yellow-400 mb-3">Contraseña incorrecta</h2>
+                        <p class="text-gray-300">El correo es correcto, pero la contraseña no coincide.</p>
+                    </div>
+                    <div class="space-y-3 mt-8">
+                        <a href="formularios.php?recuperar" class="block">
+                            <button class="w-full bg-gradient-to-r from-yellow-500 to-orange-600 hover:from-yellow-600 hover:to-orange-700 text-black font-semibold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg">
+                                ¿Olvidaste tu contraseña?
+                            </button>
+                        </a>
+                        <a href="formularios.php?inicio" class="block">
+                            <button class="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg">
+                                Volver a intentar
+                            </button>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            </body>
+            </html>';
+            exit;
         }
     }
 
-// REGISTRO
 } elseif (isset($_POST['registroUsu'])) {
     $email = $_POST['email'];
     $nombre = $_POST['username'];
@@ -78,7 +138,25 @@ if (isset($_POST['inicioUsu'])) {
     $password2 = $_POST['password2'];
 
     if ($password !== $password2) {
-        echo "<h2 style='color:red; text-align:center;'>Las contraseñas no coinciden</h2>";
+        mostrarHeader('Error en registro');
+        echo '
+        <div class="container mx-auto px-4 py-16">
+            <div class="max-w-md mx-auto bg-gray-800/80 backdrop-blur-lg rounded-2xl shadow-2xl border border-purple-500/30 p-8 text-center">
+                <div class="inline-block p-4 bg-red-500/20 rounded-full mb-4">
+                    <svg class="w-16 h-16 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </div>
+                <h2 class="text-3xl font-bold text-red-400 mb-4">Las contraseñas no coinciden</h2>
+                <a href="formularios.php?registro" class="block mt-6">
+                    <button class="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg">
+                        Volver a intentar
+                    </button>
+                </a>
+            </div>
+        </div>
+        </body>
+        </html>';
         exit;
     }
 
@@ -87,7 +165,33 @@ if (isset($_POST['inicioUsu'])) {
     $stmt->execute();
     $stmt->store_result();
     if ($stmt->num_rows > 0) {
-        echo "<h2 style='color:red; text-align:center;'>Este correo ya está registrado</h2>";
+        $stmt->close();
+        mostrarHeader('Correo ya registrado');
+        echo '
+        <div class="container mx-auto px-4 py-16">
+            <div class="max-w-md mx-auto bg-gray-800/80 backdrop-blur-lg rounded-2xl shadow-2xl border border-purple-500/30 p-8 text-center">
+                <div class="inline-block p-4 bg-red-500/20 rounded-full mb-4">
+                    <svg class="w-16 h-16 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                    </svg>
+                </div>
+                <h2 class="text-3xl font-bold text-red-400 mb-4">Este correo ya está registrado</h2>
+                <div class="space-y-3 mt-6">
+                    <a href="formularios.php?inicio" class="block">
+                        <button class="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg">
+                            Iniciar sesión
+                        </button>
+                    </a>
+                    <a href="formularios.php?registro" class="block">
+                        <button class="w-full bg-gray-600 hover:bg-gray-700 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300">
+                            Intentar con otro correo
+                        </button>
+                    </a>
+                </div>
+            </div>
+        </div>
+        </body>
+        </html>';
         exit;
     }
     $stmt->close();
@@ -101,14 +205,31 @@ if (isset($_POST['inicioUsu'])) {
     $stmt->execute();
     $stmt->close();
 
-    echo "<h2 style='color:green; text-align:center;'>Cuenta registrada correctamente</h2>";
-    echo "<p style='text-align:center;'><a href='formularios.php?inicio'>Iniciar sesión</a></p>";
+    mostrarHeader('Registro exitoso');
+    echo '
+    <div class="container mx-auto px-4 py-16">
+        <div class="max-w-md mx-auto bg-gray-800/80 backdrop-blur-lg rounded-2xl shadow-2xl border border-purple-500/30 p-8 text-center">
+            <div class="inline-block p-4 bg-green-500/20 rounded-full mb-4">
+                <svg class="w-16 h-16 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+            </div>
+            <h2 class="text-3xl font-bold text-green-400 mb-4">¡Cuenta registrada correctamente!</h2>
+            <p class="text-gray-300 mb-6">Tu cuenta ha sido creada exitosamente</p>
+            <a href="formularios.php?inicio" class="block">
+                <button class="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg">
+                    Iniciar sesión
+                </button>
+            </a>
+        </div>
+    </div>
+    </body>
+    </html>';
+    exit;
 
-// RECUPERACIÓN
 } elseif (isset($_POST['emailrec'])) {
     $email = $_POST['emailrec'];
 
-    // Verificar que el correo existe
     $stmt = $conexion->prepare("SELECT usu_id FROM usuarios WHERE email = ? AND est_id = 1");
     $stmt->bind_param("s", $email);
     $stmt->execute();
@@ -116,26 +237,39 @@ if (isset($_POST['inicioUsu'])) {
     
     if ($stmt->num_rows === 0) {
         $stmt->close();
-        echo "<h2 style='color:red; text-align:center;'>No existe una cuenta con este correo electrónico</h2>";
-        echo "<p style='text-align:center;'><a href='formularios.php?recuperar'>Volver a intentar</a></p>";
+        mostrarHeader('Correo no encontrado');
+        echo '
+        <div class="container mx-auto px-4 py-16">
+            <div class="max-w-md mx-auto bg-gray-800/80 backdrop-blur-lg rounded-2xl shadow-2xl border border-purple-500/30 p-8 text-center">
+                <div class="inline-block p-4 bg-red-500/20 rounded-full mb-4">
+                    <svg class="w-16 h-16 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                    </svg>
+                </div>
+                <h2 class="text-3xl font-bold text-red-400 mb-4">No existe una cuenta con este correo electrónico</h2>
+                <a href="formularios.php?recuperar" class="block mt-6">
+                    <button class="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg">
+                        Volver a intentar
+                    </button>
+                </a>
+            </div>
+        </div>
+        </body>
+        </html>';
         exit;
     }
     $stmt->close();
 
-    // Generar contraseña temporal
     $temporal = substr(str_shuffle("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"), 0, 8);
 
-    // Guardar temporal en la base de datos
     $stmt = $conexion->prepare("UPDATE usuarios SET clave=? WHERE email=?");
     $stmt->bind_param("ss", $temporal, $email);
     $stmt->execute();
     $stmt->close();
 
-    // Guardar en sesión para detectar que es temporal
     $_SESSION['temporal_pass'] = $temporal;
     $_SESSION['recovery_email'] = $email;
 
-    // Enviar correo con PHPMailer
     $mail = new PHPMailer(true);
     try {
         $mail->isSMTP();
@@ -145,40 +279,59 @@ if (isset($_POST['inicioUsu'])) {
         $mail->Password = 'bqxg bpia fcav didf';
         $mail->SMTPSecure = 'tls';
         $mail->Port = 587;
-        $mail->CharSet = 'UTF-8'; // Configurar codificación UTF-8
+        $mail->CharSet = 'UTF-8';
 
         $mail->setFrom('cinevice.suport@gmail.com', 'CineVice');
         $mail->addAddress($email);
         $mail->isHTML(true);
         $mail->Subject = 'Recuperación de contraseña CineVice';
-        $mail->Body = "
-            <html>
-            <head>
-                <meta charset='UTF-8'>
-                <title>Recuperación de contraseña</title>
-            </head>
-            <body>
-                <h2>🔐 Recuperación de contraseña - CineVice</h2>
-                <p>Hola,</p>
-                <p>Has solicitado recuperar tu contraseña para tu cuenta de CineVice.</p>
-                <p><strong>Tu nueva contraseña temporal es: <span style='background:#f0f0f0; padding:5px; font-family:monospace; font-size:18px;'>$temporal</span></strong></p>
-                <p>⚠️ <strong>Importante:</strong> Esta contraseña es temporal. Te recomendamos cambiarla inmediatamente después de iniciar sesión.</p>
-                <p>Si no solicitaste este cambio, contacta con nuestro soporte.</p>
-                <br>
-                <p>Saludos,<br>El equipo de CineVice</p>
-            </body>
-            </html>
-        ";
+        $mail->Body = "<html><body><h2>Recuperación de contraseña - CineVice</h2><p>Tu nueva contraseña temporal es: <strong>$temporal</strong></p><p>Te recomendamos cambiarla después de iniciar sesión.</p></body></html>";
 
         $mail->send();
-        echo "<h2 style='color:green; text-align:center;'>Se ha enviado un correo con la contraseña temporal</h2>";
-        echo "<p style='text-align:center;'><a href='formularios.php?inicio'>Iniciar sesión con la contraseña temporal</a></p>";
+        mostrarHeader('Correo enviado');
+        echo '
+        <div class="container mx-auto px-4 py-16">
+            <div class="max-w-md mx-auto bg-gray-800/80 backdrop-blur-lg rounded-2xl shadow-2xl border border-purple-500/30 p-8 text-center">
+                <div class="inline-block p-4 bg-green-500/20 rounded-full mb-4">
+                    <svg class="w-16 h-16 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 19v-8.93a2 2 0 01.89-1.664l7-4.666a2 2 0 012.22 0l7 4.666A2 2 0 0121 10.07V19M3 19a2 2 0 002 2h14a2 2 0 002-2M3 19l6.75-4.5M21 19l-6.75-4.5M3 10l6.75 4.5M21 10l-6.75 4.5m0 0l-1.14.76a2 2 0 01-2.22 0l-1.14-.76"></path>
+                    </svg>
+                </div>
+                <h2 class="text-3xl font-bold text-green-400 mb-4">¡Correo enviado!</h2>
+                <p class="text-gray-300 mb-6">Se ha enviado un correo con la contraseña temporal</p>
+                <a href="formularios.php?inicio" class="block">
+                    <button class="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg">
+                        Iniciar sesión
+                    </button>
+                </a>
+            </div>
+        </div>
+        </body>
+        </html>';
     } catch (Exception $e) {
-        echo "<h2 style='color:red; text-align:center;'>Error al enviar correo: {$mail->ErrorInfo}</h2>";
-        echo "<p style='text-align:center;'><a href='formularios.php?recuperar'>Volver a intentar</a></p>";
+        mostrarHeader('Error al enviar correo');
+        echo '
+        <div class="container mx-auto px-4 py-16">
+            <div class="max-w-md mx-auto bg-gray-800/80 backdrop-blur-lg rounded-2xl shadow-2xl border border-purple-500/30 p-8 text-center">
+                <div class="inline-block p-4 bg-red-500/20 rounded-full mb-4">
+                    <svg class="w-16 h-16 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+                <h2 class="text-3xl font-bold text-red-400 mb-4">Error al enviar correo</h2>
+                <p class="text-gray-300 mb-6">' . htmlspecialchars($mail->ErrorInfo) . '</p>
+                <a href="formularios.php?recuperar" class="block">
+                    <button class="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg">
+                        Volver a intentar
+                    </button>
+                </a>
+            </div>
+        </div>
+        </body>
+        </html>';
     }
+    exit;
 
-// CAMBIO DE CONTRASEÑA
 } elseif (isset($_POST['cambiarClave'])) {
     if (!isset($_SESSION['usuario'])) {
         header("Location: formularios.php?inicio");
@@ -193,15 +346,52 @@ if (isset($_POST['inicioUsu'])) {
     $stmt->execute();
     $stmt->close();
 
-    // Ya no es temporal
     unset($_SESSION['temporal_pass']);
     unset($_SESSION['temporal']);
     unset($_SESSION['recovery_email']);
 
-    echo "<h2 style='color:green; text-align:center;'>Contraseña cambiada correctamente</h2>";
-    echo "<p style='text-align:center;'><a href='perfil.php'>Ir al perfil</a></p>";
+    mostrarHeader('Contraseña cambiada');
+    echo '
+    <div class="container mx-auto px-4 py-16">
+        <div class="max-w-md mx-auto bg-gray-800/80 backdrop-blur-lg rounded-2xl shadow-2xl border border-purple-500/30 p-8 text-center">
+            <div class="inline-block p-4 bg-green-500/20 rounded-full mb-4">
+                <svg class="w-16 h-16 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                </svg>
+            </div>
+            <h2 class="text-3xl font-bold text-green-400 mb-4">¡Contraseña cambiada!</h2>
+            <p class="text-gray-300 mb-6">Tu contraseña ha sido actualizada</p>
+            <a href="perfil.php" class="block">
+                <button class="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg">
+                    Ir al perfil
+                </button>
+            </a>
+        </div>
+    </div>
+    </body>
+    </html>';
+    exit;
 
 } else {
-    echo "<h2 style='color:red; text-align:center;'>Acceso inválido</h2>";
+    mostrarHeader('Acceso inválido');
+    echo '
+    <div class="container mx-auto px-4 py-16">
+        <div class="max-w-md mx-auto bg-gray-800/80 backdrop-blur-lg rounded-2xl shadow-2xl border border-purple-500/30 p-8 text-center">
+            <div class="inline-block p-4 bg-red-500/20 rounded-full mb-4">
+                <svg class="w-16 h-16 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                </svg>
+            </div>
+            <h2 class="text-3xl font-bold text-red-400 mb-4">Acceso inválido</h2>
+            <p class="text-gray-300 mb-6">No se detectó ninguna acción válida</p>
+            <a href="../../../index.php" class="block">
+                <button class="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg">
+                    Volver al inicio
+                </button>
+            </a>
+        </div>
+    </div>
+    </body>
+    </html>';
 }
 ?>
