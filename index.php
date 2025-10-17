@@ -196,7 +196,7 @@ while ($peli = mysqli_fetch_assoc($result_series)) {
                         <div class="group cursor-pointer">
                             <a href="./cinevice_0.1/es_cine/en_desarrollo.php?peli_id=<?php echo $peli['peli_id']; ?>" class="block">
                                 <div class="relative overflow-hidden rounded-2xl shadow-lg group-hover:shadow-2xl transition-all duration-300 transform group-hover:scale-105">
-                                    <img src="./cinevice_0.1/es_cine/Imágenes/Posters/<?php echo $peli['poster']; ?>" alt="<?php echo $peli['nombre']; ?>" class="w-full h-80 object-cover" onerror="this.src='./cinevice_0.1/es_cine/Imágenes/default-poster.jpg'">
+                                    <img src="./cinevice_0.1/es_cine/Imágenes/<?php echo $peli['poster']; ?>" alt="<?php echo $peli['nombre']; ?>" class="w-full h-80 object-cover" onerror="this.src='./cinevice_0.1/es_cine/Imágenes/default-poster.jpg'">
                                     <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                                     <div class="absolute bottom-4 left-4 right-4 text-white transform translate-y-full group-hover:translate-y-0 transition-transform duration-300">
                                         <h3 class="font-bold text-lg"><?php echo $peli['nombre']; ?></h3>
@@ -220,7 +220,7 @@ while ($peli = mysqli_fetch_assoc($result_series)) {
                         <div class="group cursor-pointer">
                             <a href="./cinevice_0.1/es_cine/en_desarrollo.php?peli_id=<?php echo $peli['peli_id']; ?>" class="block">
                                 <div class="relative overflow-hidden rounded-2xl shadow-lg group-hover:shadow-2xl transition-all duration-300 transform group-hover:scale-105">
-                                    <img src="./cinevice_0.1/es_cine/Imágenes/Posters/<?php echo $peli['poster']; ?>" alt="<?php echo $peli['nombre']; ?>" class="w-full h-80 object-cover" onerror="this.src='./cinevice_0.1/es_cine/Imágenes/default-poster.jpg'">
+                                    <img src="./cinevice_0.1/es_cine/Imágenes/<?php echo $peli['poster']; ?>" alt="<?php echo $peli['nombre']; ?>" class="w-full h-80 object-cover" onerror="this.src='./cinevice_0.1/es_cine/Imágenes/default-poster.jpg'">
                                     <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                                     <div class="absolute bottom-4 left-4 right-4 text-white transform translate-y-full group-hover:translate-y-0 transition-transform duration-300">
                                         <h3 class="font-bold text-lg"><?php echo $peli['nombre']; ?></h3>
@@ -244,7 +244,7 @@ while ($peli = mysqli_fetch_assoc($result_series)) {
                         <div class="group cursor-pointer">
                             <a href="./cinevice_0.1/es_cine/en_desarrollo.php?peli_id=<?php echo $peli['peli_id']; ?>" class="block">
                                 <div class="relative overflow-hidden rounded-2xl shadow-lg group-hover:shadow-2xl transition-all duration-300 transform group-hover:scale-105">
-                                    <img src="./cinevice_0.1/es_cine/Imágenes/Posters/<?php echo $peli['poster']; ?>" alt="<?php echo $peli['nombre']; ?>" class="w-full h-80 object-cover" onerror="this.src='./cinevice_0.1/es_cine/Imágenes/default-poster.jpg'">
+                                    <img src="./cinevice_0.1/es_cine/Imágenes/<?php echo $peli['poster']; ?>" alt="<?php echo $peli['nombre']; ?>" class="w-full h-80 object-cover" onerror="this.src='./cinevice_0.1/es_cine/Imágenes/default-poster.jpg'">
                                     <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                                     <div class="absolute bottom-4 left-4 right-4 text-white transform translate-y-full group-hover:translate-y-0 transition-transform duration-300">
                                         <h3 class="font-bold text-lg"><?php echo $peli['nombre']; ?></h3>
@@ -305,7 +305,7 @@ while ($peli = mysqli_fetch_assoc($result_series)) {
 
             <div class="border-t border-gray-700 mt-8 pt-8 text-center">
                 <p class="text-gray-400">&copy; 2025 CineVice. Todos los derechos reservados.</p>
-                <p class="text-gray-500 text-sm mt-2">Versión 0.5 Beta</p>
+                <p class="text-gray-500 text-sm mt-2">Versión 0.6 Beta</p>
             </div>
         </div>
     </footer>

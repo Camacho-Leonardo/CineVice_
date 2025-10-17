@@ -18,6 +18,9 @@ if ($usuario['rol_id'] != 1) {
 $success_message = "";
 $error_message = "";
 
+// Directorio para subir imágenes
+$upload_dir = "../Imágenes/";
+
 // ============================================
 // GESTIÓN DE USUARIOS
 // ============================================
@@ -87,30 +90,58 @@ if (isset($_POST['action_pelicula'])) {
         $tipo_id = $_POST['tipo_id'];
         $pais = $_POST['pais'];
         $idioma = $_POST['idioma'];
-        $poster = $_POST['poster'];
         $generos = isset($_POST['generos']) ? $_POST['generos'] : [];
         
-        $query = "INSERT INTO pelis (nombre, descripcion, emision, duracion, episodios, tipo_id, pais, idioma, est_id, poster) 
-                  VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1, ?)";
-        $stmt = $conexion->prepare($query);
-        $stmt->bind_param("sssiiisss", $nombre, $descripcion, $emision, $duracion, $episodios, $tipo_id, $pais, $idioma, $poster);
+        // Manejo de la imagen del poster
+        $poster_nombre = "";
         
-        if ($stmt->execute()) {
-            $peli_id = $conexion->insert_id;
+        // Opción 1: Subir archivo
+        if (isset($_FILES['poster_file']) && $_FILES['poster_file']['error'] == 0) {
+            $allowed = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+            $filename = $_FILES['poster_file']['name'];
+            $filetype = pathinfo($filename, PATHINFO_EXTENSION);
             
-            // Insertar géneros
-            if (!empty($generos)) {
-                $query_gen = "INSERT INTO pelis_generos (peli_id, gen_id) VALUES (?, ?)";
-                $stmt_gen = $conexion->prepare($query_gen);
-                foreach ($generos as $gen_id) {
-                    $stmt_gen->bind_param("ii", $peli_id, $gen_id);
-                    $stmt_gen->execute();
+            if (in_array(strtolower($filetype), $allowed)) {
+                $new_filename = uniqid() . '_' . $filename;
+                $upload_path = $upload_dir . $new_filename;
+                
+                if (move_uploaded_file($_FILES['poster_file']['tmp_name'], $upload_path)) {
+                    $poster_nombre = $new_filename;
+                } else {
+                    $error_message = "Error al subir la imagen del poster";
                 }
+            } else {
+                $error_message = "Formato de imagen no permitido. Use: jpg, jpeg, png, gif, webp";
             }
+        }
+        // Opción 2: Nombre manual
+        elseif (!empty($_POST['poster'])) {
+            $poster_nombre = $_POST['poster'];
+        }
+        
+        if (empty($error_message)) {
+            $query = "INSERT INTO pelis (nombre, descripcion, emision, duracion, episodios, tipo_id, pais, idioma, est_id, poster) 
+                      VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1, ?)";
+            $stmt = $conexion->prepare($query);
+            $stmt->bind_param("sssiiisss", $nombre, $descripcion, $emision, $duracion, $episodios, $tipo_id, $pais, $idioma, $poster_nombre);
             
-            $success_message = "Película/Serie creada correctamente";
-        } else {
-            $error_message = "Error al crear película/serie";
+            if ($stmt->execute()) {
+                $peli_id = $conexion->insert_id;
+                
+                // Insertar géneros
+                if (!empty($generos)) {
+                    $query_gen = "INSERT INTO pelis_generos (peli_id, gen_id) VALUES (?, ?)";
+                    $stmt_gen = $conexion->prepare($query_gen);
+                    foreach ($generos as $gen_id) {
+                        $stmt_gen->bind_param("ii", $peli_id, $gen_id);
+                        $stmt_gen->execute();
+                    }
+                }
+                
+                $success_message = "Película/Serie creada correctamente";
+            } else {
+                $error_message = "Error al crear película/serie";
+            }
         }
     }
     
@@ -144,7 +175,7 @@ if (isset($_POST['action_foro'])) {
         $query = "INSERT INTO foros (usu_id, nombre, descripcion, genero_id, creacion, est_id) 
                   VALUES (?, ?, ?, ?, NOW(), 1)";
         $stmt = $conexion->prepare($query);
-        $stmt->bind_param("issi", $usuario['id'], $nombre, $descripcion, $genero_id);
+        $stmt->bind_param("issi", $usuario['usu_id'], $nombre, $descripcion, $genero_id);
         
         if ($stmt->execute()) {
             $success_message = "Foro creado correctamente";
@@ -217,7 +248,7 @@ $usuarios_query = "SELECT u.*, r.nombre as rol_nombre, e.nombre as estado_nombre
                    ORDER BY u.usu_id DESC";
 $usuarios_result = $conexion->query($usuarios_query);
 
-// Obtener todas las películas/series
+// Obtener todas las películas/series ACTIVAS para mostrar en la web
 $pelis_query = "SELECT p.*, t.descripcion as tipo_desc, e.nombre as estado_nombre,
                 GROUP_CONCAT(g.nombre SEPARATOR ', ') as generos
                 FROM pelis p 
@@ -295,10 +326,14 @@ $stats = $stats_result->fetch_assoc();
     <link href="../../../src/output.css" rel="stylesheet">
     <link rel="icon" type="image/x-icon" href="../Imágenes/c-logo.png">
     <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    <style>
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+    </style>
 </head>
-<body class="min-h-screen transition-all duration-300" id="body">
+<body class="min-h-screen bg-gradient-to-br from-pink-100 to-blue-100" id="body">
     <!-- Navigation Bar -->
-    <nav class="shadow-lg transition-all duration-300" id="navbar">
+    <nav class="bg-white shadow-lg" id="navbar">
         <div class="max-w-7xl mx-auto px-4">
             <div class="flex justify-between items-center h-16">
                 <div class="flex items-center space-x-4">
@@ -308,25 +343,25 @@ $stats = $stats_result->fetch_assoc();
                         </h1>
                     </a>
                     <div class="hidden md:flex space-x-2 ml-8">
-                        <a href="../peliculas_series.php" class="px-4 py-2 rounded-lg transition-all duration-200 hover:bg-blue-500 hover:text-white">
+                        <a href="../peliculas_series.php" class="px-4 py-2 rounded-lg text-gray-700 hover:bg-blue-500 hover:text-white transition-all duration-200">
                             Películas/Series
                         </a>
-                        <a href="../foros.php" class="px-4 py-2 rounded-lg transition-all duration-200 hover:bg-blue-500 hover:text-white">
+                        <a href="../foros.php" class="px-4 py-2 rounded-lg text-gray-700 hover:bg-blue-500 hover:text-white transition-all duration-200">
                             Foros
                         </a>
-                        <a href="perfil.php" class="px-4 py-2 rounded-lg transition-all duration-200 hover:bg-blue-500 hover:text-white">
+                        <a href="perfil.php" class="px-4 py-2 rounded-lg text-gray-700 hover:bg-blue-500 hover:text-white transition-all duration-200">
                             Mi Perfil
                         </a>
                     </div>
                 </div>
 
                 <div class="flex items-center space-x-4">
-                    <button id="themeToggle" class="p-2 rounded-lg transition-colors duration-200 hover:bg-gray-200 dark:hover:bg-gray-700">
-                        <i data-feather="sun" class="w-5 h-5 hidden dark:block"></i>
-                        <i data-feather="moon" class="w-5 h-5 block dark:hidden"></i>
+                    <button id="themeToggle" class="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-200">
+                        <i data-feather="sun" class="w-5 h-5 hidden dark-icon"></i>
+                        <i data-feather="moon" class="w-5 h-5 light-icon"></i>
                     </button>
                     
-                    <span class="hidden md:block font-medium">👑 Admin: <?php echo htmlspecialchars($usuario['nombre']); ?></span>
+                    <span class="hidden md:block font-medium text-gray-700" id="adminName">👑 Admin: <?php echo htmlspecialchars($usuario['nombre']); ?></span>
                     
                     <a href="./logout.php" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors duration-200">
                         Cerrar Sesión
@@ -340,54 +375,54 @@ $stats = $stats_result->fetch_assoc();
     <main class="max-w-7xl mx-auto px-4 py-8">
         <?php if ($success_message): ?>
             <div class="mb-6 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg">
-                <?php echo $success_message; ?>
+                ✓ <?php echo $success_message; ?>
             </div>
         <?php endif; ?>
         
         <?php if ($error_message): ?>
             <div class="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
-                <?php echo $error_message; ?>
+                ✗ <?php echo $error_message; ?>
             </div>
         <?php endif; ?>
 
         <!-- Estadísticas Dashboard -->
         <div class="mb-8">
-            <h2 class="text-3xl font-bold mb-6">📊 Panel de Administración</h2>
+            <h2 class="text-3xl font-bold mb-6 text-gray-800" id="mainTitle">📊 Panel de Administración</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <div class="rounded-xl shadow-lg p-6 transition-all duration-300" id="statCard1">
+                <div class="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-all duration-300">
                     <div class="flex items-center justify-between">
                         <div>
-                            <p class="text-sm opacity-70">Usuarios Activos</p>
+                            <p class="text-sm text-gray-600">Usuarios Activos</p>
                             <p class="text-3xl font-bold text-green-500"><?php echo $stats['usuarios_activos']; ?></p>
                         </div>
                         <i data-feather="users" class="w-12 h-12 text-green-500"></i>
                     </div>
                 </div>
 
-                <div class="rounded-xl shadow-lg p-6 transition-all duration-300" id="statCard2">
+                <div class="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-all duration-300">
                     <div class="flex items-center justify-between">
                         <div>
-                            <p class="text-sm opacity-70">Usuarios Bloqueados</p>
+                            <p class="text-sm text-gray-600">Usuarios Bloqueados</p>
                             <p class="text-3xl font-bold text-red-500"><?php echo $stats['usuarios_bloqueados']; ?></p>
                         </div>
                         <i data-feather="user-x" class="w-12 h-12 text-red-500"></i>
                     </div>
                 </div>
 
-                <div class="rounded-xl shadow-lg p-6 transition-all duration-300" id="statCard3">
+                <div class="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-all duration-300">
                     <div class="flex items-center justify-between">
                         <div>
-                            <p class="text-sm opacity-70">Películas/Series</p>
+                            <p class="text-sm text-gray-600">Películas/Series</p>
                             <p class="text-3xl font-bold text-blue-500"><?php echo $stats['pelis_activas']; ?></p>
                         </div>
                         <i data-feather="film" class="w-12 h-12 text-blue-500"></i>
                     </div>
                 </div>
 
-                <div class="rounded-xl shadow-lg p-6 transition-all duration-300" id="statCard4">
+                <div class="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-all duration-300">
                     <div class="flex items-center justify-between">
                         <div>
-                            <p class="text-sm opacity-70">Infracciones Pendientes</p>
+                            <p class="text-sm text-gray-600">Infracciones Pendientes</p>
                             <p class="text-3xl font-bold text-yellow-500"><?php echo $stats['infracciones_pendientes']; ?></p>
                         </div>
                         <i data-feather="alert-triangle" class="w-12 h-12 text-yellow-500"></i>
@@ -397,76 +432,230 @@ $stats = $stats_result->fetch_assoc();
         </div>
 
         <!-- Tabs Navigation -->
-        <div class="mb-6" id="tabsContainer">
+        <div class="mb-6 bg-white p-2 rounded-xl shadow" id="tabsContainer">
             <div class="flex flex-wrap gap-2">
-                <button onclick="showTab('usuarios')" class="tab-btn px-6 py-3 rounded-lg font-medium transition-all duration-200" data-tab="usuarios">
+                <button onclick="showTab('usuarios')" class="tab-btn px-6 py-3 rounded-lg font-medium transition-all duration-200 bg-blue-500 text-white" data-tab="usuarios">
                     <i data-feather="users" class="w-4 h-4 inline mr-2"></i>Usuarios
                 </button>
-                <button onclick="showTab('peliculas')" class="tab-btn px-6 py-3 rounded-lg font-medium transition-all duration-200" data-tab="peliculas">
+                <button onclick="showTab('peliculas')" class="tab-btn px-6 py-3 rounded-lg font-medium transition-all duration-200 bg-gray-100 text-gray-700 hover:bg-gray-200" data-tab="peliculas">
                     <i data-feather="film" class="w-4 h-4 inline mr-2"></i>Películas/Series
                 </button>
-                <button onclick="showTab('foros')" class="tab-btn px-6 py-3 rounded-lg font-medium transition-all duration-200" data-tab="foros">
+                <button onclick="showTab('foros')" class="tab-btn px-6 py-3 rounded-lg font-medium transition-all duration-200 bg-gray-100 text-gray-700 hover:bg-gray-200" data-tab="foros">
                     <i data-feather="message-square" class="w-4 h-4 inline mr-2"></i>Foros
                 </button>
-                <button onclick="showTab('palabras')" class="tab-btn px-6 py-3 rounded-lg font-medium transition-all duration-200" data-tab="palabras">
+                <button onclick="showTab('palabras')" class="tab-btn px-6 py-3 rounded-lg font-medium transition-all duration-200 bg-gray-100 text-gray-700 hover:bg-gray-200" data-tab="palabras">
                     <i data-feather="alert-circle" class="w-4 h-4 inline mr-2"></i>Palabras Prohibidas
                 </button>
-                <button onclick="showTab('infracciones')" class="tab-btn px-6 py-3 rounded-lg font-medium transition-all duration-200" data-tab="infracciones">
+                <button onclick="showTab('infracciones')" class="tab-btn px-6 py-3 rounded-lg font-medium transition-all duration-200 bg-gray-100 text-gray-700 hover:bg-gray-200" data-tab="infracciones">
                     <i data-feather="alert-triangle" class="w-4 h-4 inline mr-2"></i>Infracciones
                 </button>
             </div>
         </div>
 
         <!-- Tab: Usuarios -->
-        <div id="tab-usuarios" class="tab-content hidden">
-            <div class="rounded-2xl shadow-xl p-6 transition-all duration-300 mb-6" id="createUserCard">
-                <h3 class="text-xl font-bold mb-4 flex items-center">
+        <div id="tab-usuarios" class="tab-content active">
+            <div class="bg-white rounded-2xl shadow-xl p-6 mb-6">
+                <h3 class="text-xl font-bold mb-4 flex items-center text-gray-800">
                     <i data-feather="user-plus" class="w-5 h-5 mr-2"></i>Crear Nuevo Usuario
                 </h3>
                 <form method="POST" class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <input type="hidden" name="action_usuario" value="crear_usuario">
-                    <input type="text" name="nombre" placeholder="Nombre" required class="px-4 py-2 rounded-lg border" id="inputField1">
-                    <input type="email" name="email" placeholder="Email" required class="px-4 py-2 rounded-lg border" id="inputField2">
-                    <input type="text" name="clave" placeholder="Contraseña" required class="px-4 py-2 rounded-lg border" id="inputField3">
-                    <select name="rol_id" required class="px-4 py-2 rounded-lg border" id="selectField1">
-                        <?php while ($rol = $roles_result->fetch_assoc()): ?>
+                    <input type="text" name="nombre" placeholder="Nombre" required class="px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <input type="email" name="email" placeholder="Email" required class="px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <input type="text" name="clave" placeholder="Contraseña" required class="px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <select name="rol_id" required class="px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <option value="">Seleccionar Rol</option>
+                        <?php 
+                        $roles_result->data_seek(0);
+                        while ($rol = $roles_result->fetch_assoc()): ?>
                             <option value="<?php echo $rol['rol_id']; ?>"><?php echo $rol['nombre']; ?></option>
                         <?php endwhile; ?>
                     </select>
-                    <button type="submit" class="md:col-span-2 px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">
-                        Añadir Película/Serie
+                    <button type="submit" class="md:col-span-2 px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium shadow-md hover:shadow-lg">
+                        <i data-feather="plus" class="w-4 h-4 inline mr-2"></i>Crear Usuario
                     </button>
                 </form>
             </div>
 
-            <div class="rounded-2xl shadow-xl p-6 transition-all duration-300" id="moviesTableCard">
-                <h3 class="text-xl font-bold mb-4">Lista de Películas/Series</h3>
+            <div class="bg-white rounded-2xl shadow-xl p-6">
+                <h3 class="text-xl font-bold mb-4 text-gray-800">Lista de Usuarios</h3>
                 <div class="overflow-x-auto">
                     <table class="w-full">
                         <thead>
-                            <tr class="border-b" id="tableHeader">
-                                <th class="text-left p-3">ID</th>
-                                <th class="text-left p-3">Nombre</th>
-                                <th class="text-left p-3">Tipo</th>
-                                <th class="text-left p-3">Año</th>
-                                <th class="text-left p-3">Géneros</th>
-                                <th class="text-left p-3">Estado</th>
-                                <th class="text-left p-3">Acción</th>
+                            <tr class="border-b border-gray-200 bg-gray-50">
+                                <th class="text-left p-3 font-semibold text-gray-700">ID</th>
+                                <th class="text-left p-3 font-semibold text-gray-700">Nombre</th>
+                                <th class="text-left p-3 font-semibold text-gray-700">Email</th>
+                                <th class="text-left p-3 font-semibold text-gray-700">Rol</th>
+                                <th class="text-left p-3 font-semibold text-gray-700">Estado</th>
+                                <th class="text-left p-3 font-semibold text-gray-700">Estado Visual</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <?php while ($peli = $pelis_result->fetch_assoc()): ?>
-                                <tr class="border-b hover:bg-opacity-50 transition-colors" id="tableRow">
-                                    <td class="p-3"><?php echo $peli['peli_id']; ?></td>
-                                    <td class="p-3"><?php echo htmlspecialchars($peli['nombre']); ?></td>
-                                    <td class="p-3"><?php echo $peli['tipo_desc']; ?></td>
-                                    <td class="p-3"><?php echo $peli['emision']; ?></td>
-                                    <td class="p-3 text-sm"><?php echo htmlspecialchars($peli['generos']); ?></td>
+                            <?php 
+                            $usuarios_result->data_seek(0);
+                            while ($user = $usuarios_result->fetch_assoc()): ?>
+                                <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                                    <td class="p-3 text-gray-700"><?php echo $user['usu_id']; ?></td>
+                                    <td class="p-3 text-gray-900 font-medium"><?php echo htmlspecialchars($user['nombre']); ?></td>
+                                    <td class="p-3 text-gray-600"><?php echo htmlspecialchars($user['email']); ?></td>
+                                    <td class="p-3">
+                                        <form method="POST" class="inline">
+                                            <input type="hidden" name="action_usuario" value="cambiar_rol">
+                                            <input type="hidden" name="usu_id" value="<?php echo $user['usu_id']; ?>">
+                                            <select name="nuevo_rol" onchange="this.form.submit()" class="px-2 py-1 rounded border border-gray-300 text-sm bg-white text-gray-700">
+                                                <?php 
+                                                $roles_result->data_seek(0);
+                                                while ($rol = $roles_result->fetch_assoc()): ?>
+                                                    <option value="<?php echo $rol['rol_id']; ?>" <?php echo $user['rol_id'] == $rol['rol_id'] ? 'selected' : ''; ?>>
+                                                        <?php echo $rol['nombre']; ?>
+                                                    </option>
+                                                <?php endwhile; ?>
+                                            </select>
+                                        </form>
+                                    </td>
+                                    <td class="p-3">
+                                        <form method="POST" class="inline">
+                                            <input type="hidden" name="action_usuario" value="actualizar_estado">
+                                            <input type="hidden" name="usu_id" value="<?php echo $user['usu_id']; ?>">
+                                            <select name="nuevo_estado" onchange="this.form.submit()" class="px-2 py-1 rounded border border-gray-300 text-sm bg-white text-gray-700">
+                                                <?php 
+                                                $estados_result->data_seek(0);
+                                                while ($estado = $estados_result->fetch_assoc()): ?>
+                                                    <option value="<?php echo $estado['est_id']; ?>" <?php echo $user['est_id'] == $estado['est_id'] ? 'selected' : ''; ?>>
+                                                        <?php echo $estado['nombre']; ?>
+                                                    </option>
+                                                <?php endwhile; ?>
+                                            </select>
+                                        </form>
+                                    </td>
+                                    <td class="p-3">
+                                        <span class="text-xs px-3 py-1 rounded-full font-medium <?php 
+                                            echo $user['est_id'] == 1 ? 'bg-green-100 text-green-800' : 
+                                                 ($user['est_id'] == 4 ? 'bg-red-100 text-red-800' : 'bg-gray-100 text-gray-800'); 
+                                        ?>">
+                                            <?php echo $user['estado_nombre']; ?>
+                                        </span>
+                                    </td>
+                                </tr>
+                            <?php endwhile; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab: Películas/Series -->
+        <div id="tab-peliculas" class="tab-content">
+            <div class="bg-white rounded-2xl shadow-xl p-6 mb-6">
+                <h3 class="text-xl font-bold mb-4 flex items-center text-gray-800">
+                    <i data-feather="plus-circle" class="w-5 h-5 mr-2"></i>Añadir Película/Serie
+                </h3>
+                <form method="POST" enctype="multipart/form-data" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <input type="hidden" name="action_pelicula" value="crear_pelicula">
+                    
+                    <input type="text" name="nombre" placeholder="Nombre de la película/serie" required class="px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    
+                    <div class="flex flex-col">
+                        <label class="text-sm font-medium text-gray-700 mb-1">Año de emisión</label>
+                        <input type="number" name="emision" placeholder="2024" required class="px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+                    
+                    <textarea name="descripcion" placeholder="Descripción" required class="px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent md:col-span-2" rows="3"></textarea>
+                    
+                    <div class="flex flex-col">
+                        <label class="text-sm font-medium text-gray-700 mb-1">Duración (HH:MM:SS)</label>
+                        <input type="time" name="duracion" step="1" value="00:00:00" class="px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+                    
+                    <div class="flex flex-col">
+                        <label class="text-sm font-medium text-gray-700 mb-1">Episodios (0 si es película)</label>
+                        <input type="number" name="episodios" placeholder="0" value="0" min="0" class="px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+                    
+                    <select name="tipo_id" required class="px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <option value="">Seleccionar tipo</option>
+                        <?php 
+                        $tipos_result->data_seek(0);
+                        while ($tipo = $tipos_result->fetch_assoc()): ?>
+                            <option value="<?php echo $tipo['tipo_id']; ?>"><?php echo $tipo['descripcion']; ?></option>
+                        <?php endwhile; ?>
+                    </select>
+                    
+                    <input type="text" name="pais" placeholder="País" required class="px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    
+                    <input type="text" name="idioma" placeholder="Idioma" required class="px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent md:col-span-2">
+                    
+                    <div class="md:col-span-2 p-4 border-2 border-dashed border-gray-300 rounded-lg bg-gray-50">
+                        <label class="block mb-2 font-medium text-gray-700">
+                            <i data-feather="image" class="w-4 h-4 inline mr-2"></i>Poster de la película/serie
+                        </label>
+                        <div class="space-y-3">
+                            <div>
+                                <label class="block text-sm text-gray-600 mb-1">Opción 1: Subir archivo desde tu PC</label>
+                                <input type="file" name="poster_file" accept="image/*" class="w-full px-4 py-2 rounded-lg border border-gray-300 bg-white file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-blue-500 file:text-white hover:file:bg-blue-600 file:cursor-pointer">
+                                <p class="text-xs text-gray-500 mt-1">Formatos: JPG, PNG, GIF, WEBP</p>
+                            </div>
+                            <div class="text-center text-gray-500 font-medium">- O -</div>
+                            <div>
+                                <label class="block text-sm text-gray-600 mb-1">Opción 2: Escribir nombre del archivo</label>
+                                <input type="text" name="poster" placeholder="poster.jpg" class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="md:col-span-2 p-4 border border-gray-300 rounded-lg bg-gray-50">
+                        <label class="block mb-3 font-medium text-gray-700">
+                            <i data-feather="tag" class="w-4 h-4 inline mr-2"></i>Géneros (selecciona al menos uno)
+                        </label>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                            <?php 
+                            $generos_result->data_seek(0);
+                            while ($genero = $generos_result->fetch_assoc()): ?>
+                                <label class="flex items-center space-x-2 cursor-pointer hover:bg-white p-2 rounded transition-colors">
+                                    <input type="checkbox" name="generos[]" value="<?php echo $genero['gen_id']; ?>" class="rounded text-blue-500 focus:ring-2 focus:ring-blue-500">
+                                    <span class="text-sm text-gray-700"><?php echo htmlspecialchars($genero['nombre']); ?></span>
+                                </label>
+                            <?php endwhile; ?>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="md:col-span-2 px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium shadow-md hover:shadow-lg text-lg">
+                        <i data-feather="plus" class="w-5 h-5 inline mr-2"></i>Añadir Película/Serie
+                    </button>
+                </form>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-xl p-6">
+                <h3 class="text-xl font-bold mb-4 text-gray-800">Lista de Películas/Series</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead>
+                            <tr class="border-b border-gray-200 bg-gray-50">
+                                <th class="text-left p-3 font-semibold text-gray-700">ID</th>
+                                <th class="text-left p-3 font-semibold text-gray-700">Nombre</th>
+                                <th class="text-left p-3 font-semibold text-gray-700">Tipo</th>
+                                <th class="text-left p-3 font-semibold text-gray-700">Año</th>
+                                <th class="text-left p-3 font-semibold text-gray-700">Géneros</th>
+                                <th class="text-left p-3 font-semibold text-gray-700">Estado</th>
+                                <th class="text-left p-3 font-semibold text-gray-700">Estado Visual</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php 
+                            $pelis_result->data_seek(0);
+                            while ($peli = $pelis_result->fetch_assoc()): ?>
+                                <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                                    <td class="p-3 text-gray-700"><?php echo $peli['peli_id']; ?></td>
+                                    <td class="p-3 text-gray-900 font-medium"><?php echo htmlspecialchars($peli['nombre']); ?></td>
+                                    <td class="p-3 text-gray-600"><?php echo $peli['tipo_desc']; ?></td>
+                                    <td class="p-3 text-gray-600"><?php echo $peli['emision']; ?></td>
+                                    <td class="p-3 text-sm text-gray-600 max-w-xs truncate"><?php echo htmlspecialchars($peli['generos']); ?></td>
                                     <td class="p-3">
                                         <form method="POST" class="inline">
                                             <input type="hidden" name="action_pelicula" value="actualizar_estado_pelicula">
                                             <input type="hidden" name="peli_id" value="<?php echo $peli['peli_id']; ?>">
-                                            <select name="nuevo_estado" onchange="this.form.submit()" class="px-2 py-1 rounded border text-sm" id="selectInline">
+                                            <select name="nuevo_estado" onchange="this.form.submit()" class="px-2 py-1 rounded border border-gray-300 text-sm bg-white text-gray-700">
                                                 <?php 
                                                 $estados_result->data_seek(0);
                                                 while ($estado = $estados_result->fetch_assoc()): ?>
@@ -478,7 +667,7 @@ $stats = $stats_result->fetch_assoc();
                                         </form>
                                     </td>
                                     <td class="p-3">
-                                        <span class="text-xs px-2 py-1 rounded <?php 
+                                        <span class="text-xs px-3 py-1 rounded-full font-medium <?php 
                                             echo $peli['est_id'] == 1 ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'; 
                                         ?>">
                                             <?php echo $peli['estado_nombre']; ?>
@@ -493,16 +682,16 @@ $stats = $stats_result->fetch_assoc();
         </div>
 
         <!-- Tab: Foros -->
-        <div id="tab-foros" class="tab-content hidden">
-            <div class="rounded-2xl shadow-xl p-6 transition-all duration-300 mb-6" id="createForumCard">
-                <h3 class="text-xl font-bold mb-4 flex items-center">
+        <div id="tab-foros" class="tab-content">
+            <div class="bg-white rounded-2xl shadow-xl p-6 mb-6">
+                <h3 class="text-xl font-bold mb-4 flex items-center text-gray-800">
                     <i data-feather="message-circle" class="w-5 h-5 mr-2"></i>Crear Nuevo Foro
                 </h3>
                 <form method="POST" class="grid grid-cols-1 gap-4">
                     <input type="hidden" name="action_foro" value="crear_foro">
-                    <input type="text" name="nombre" placeholder="Nombre del Foro" required class="px-4 py-2 rounded-lg border" id="inputField11">
-                    <textarea name="descripcion" placeholder="Descripción del Foro" required class="px-4 py-2 rounded-lg border" rows="3" id="textareaField2"></textarea>
-                    <select name="genero_id" class="px-4 py-2 rounded-lg border" id="selectField3">
+                    <input type="text" name="nombre" placeholder="Nombre del Foro" required class="px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <textarea name="descripcion" placeholder="Descripción del Foro" required class="px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent" rows="3"></textarea>
+                    <select name="genero_id" class="px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                         <option value="">Sin género específico</option>
                         <?php 
                         $generos_result->data_seek(0);
@@ -510,40 +699,42 @@ $stats = $stats_result->fetch_assoc();
                             <option value="<?php echo $genero['gen_id']; ?>"><?php echo htmlspecialchars($genero['nombre']); ?></option>
                         <?php endwhile; ?>
                     </select>
-                    <button type="submit" class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">
-                        Crear Foro
+                    <button type="submit" class="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium shadow-md hover:shadow-lg">
+                        <i data-feather="plus" class="w-4 h-4 inline mr-2"></i>Crear Foro
                     </button>
                 </form>
             </div>
 
-            <div class="rounded-2xl shadow-xl p-6 transition-all duration-300" id="forumsTableCard">
-                <h3 class="text-xl font-bold mb-4">Lista de Foros</h3>
+            <div class="bg-white rounded-2xl shadow-xl p-6">
+                <h3 class="text-xl font-bold mb-4 text-gray-800">Lista de Foros</h3>
                 <div class="overflow-x-auto">
                     <table class="w-full">
                         <thead>
-                            <tr class="border-b" id="tableHeader">
-                                <th class="text-left p-3">ID</th>
-                                <th class="text-left p-3">Nombre</th>
-                                <th class="text-left p-3">Creador</th>
-                                <th class="text-left p-3">Género</th>
-                                <th class="text-left p-3">Comentarios</th>
-                                <th class="text-left p-3">Estado</th>
-                                <th class="text-left p-3">Acción</th>
+                            <tr class="border-b border-gray-200 bg-gray-50">
+                                <th class="text-left p-3 font-semibold text-gray-700">ID</th>
+                                <th class="text-left p-3 font-semibold text-gray-700">Nombre</th>
+                                <th class="text-left p-3 font-semibold text-gray-700">Creador</th>
+                                <th class="text-left p-3 font-semibold text-gray-700">Género</th>
+                                <th class="text-left p-3 font-semibold text-gray-700">Comentarios</th>
+                                <th class="text-left p-3 font-semibold text-gray-700">Estado</th>
+                                <th class="text-left p-3 font-semibold text-gray-700">Estado Visual</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <?php while ($foro = $foros_result->fetch_assoc()): ?>
-                                <tr class="border-b hover:bg-opacity-50 transition-colors" id="tableRow">
-                                    <td class="p-3"><?php echo $foro['foro_id']; ?></td>
-                                    <td class="p-3"><?php echo htmlspecialchars($foro['nombre']); ?></td>
-                                    <td class="p-3"><?php echo htmlspecialchars($foro['creador']); ?></td>
-                                    <td class="p-3"><?php echo $foro['genero_nombre'] ? htmlspecialchars($foro['genero_nombre']) : 'N/A'; ?></td>
-                                    <td class="p-3"><?php echo $foro['total_comentarios']; ?></td>
+                            <?php 
+                            $foros_result->data_seek(0);
+                            while ($foro = $foros_result->fetch_assoc()): ?>
+                                <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                                    <td class="p-3 text-gray-700"><?php echo $foro['foro_id']; ?></td>
+                                    <td class="p-3 text-gray-900 font-medium"><?php echo htmlspecialchars($foro['nombre']); ?></td>
+                                    <td class="p-3 text-gray-600"><?php echo htmlspecialchars($foro['creador']); ?></td>
+                                    <td class="p-3 text-gray-600"><?php echo $foro['genero_nombre'] ? htmlspecialchars($foro['genero_nombre']) : 'N/A'; ?></td>
+                                    <td class="p-3 text-gray-600"><?php echo $foro['total_comentarios']; ?></td>
                                     <td class="p-3">
                                         <form method="POST" class="inline">
                                             <input type="hidden" name="action_foro" value="actualizar_estado_foro">
                                             <input type="hidden" name="foro_id" value="<?php echo $foro['foro_id']; ?>">
-                                            <select name="nuevo_estado" onchange="this.form.submit()" class="px-2 py-1 rounded border text-sm" id="selectInline">
+                                            <select name="nuevo_estado" onchange="this.form.submit()" class="px-2 py-1 rounded border border-gray-300 text-sm bg-white text-gray-700">
                                                 <?php 
                                                 $estados_result->data_seek(0);
                                                 while ($estado = $estados_result->fetch_assoc()): ?>
@@ -555,7 +746,7 @@ $stats = $stats_result->fetch_assoc();
                                         </form>
                                     </td>
                                     <td class="p-3">
-                                        <span class="text-xs px-2 py-1 rounded <?php 
+                                        <span class="text-xs px-3 py-1 rounded-full font-medium <?php 
                                             echo $foro['est_id'] == 1 ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'; 
                                         ?>">
                                             <?php echo $foro['estado_nombre']; ?>
@@ -570,42 +761,44 @@ $stats = $stats_result->fetch_assoc();
         </div>
 
         <!-- Tab: Palabras Prohibidas -->
-        <div id="tab-palabras" class="tab-content hidden">
-            <div class="rounded-2xl shadow-xl p-6 transition-all duration-300 mb-6" id="createWordCard">
-                <h3 class="text-xl font-bold mb-4 flex items-center">
+        <div id="tab-palabras" class="tab-content">
+            <div class="bg-white rounded-2xl shadow-xl p-6 mb-6">
+                <h3 class="text-xl font-bold mb-4 flex items-center text-gray-800">
                     <i data-feather="slash" class="w-5 h-5 mr-2"></i>Añadir Palabra Prohibida
                 </h3>
                 <form method="POST" class="flex gap-4">
                     <input type="hidden" name="action_palabra" value="crear_palabra">
-                    <input type="text" name="palabra" placeholder="Palabra prohibida" required class="flex-1 px-4 py-2 rounded-lg border" id="inputField12">
-                    <button type="submit" class="px-6 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors">
-                        Añadir
+                    <input type="text" name="palabra" placeholder="Palabra prohibida" required class="flex-1 px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-red-500 focus:border-transparent">
+                    <button type="submit" class="px-6 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors font-medium shadow-md hover:shadow-lg">
+                        <i data-feather="plus" class="w-4 h-4 inline mr-2"></i>Añadir
                     </button>
                 </form>
             </div>
 
-            <div class="rounded-2xl shadow-xl p-6 transition-all duration-300" id="wordsTableCard">
-                <h3 class="text-xl font-bold mb-4">Lista de Palabras Prohibidas</h3>
+            <div class="bg-white rounded-2xl shadow-xl p-6">
+                <h3 class="text-xl font-bold mb-4 text-gray-800">Lista de Palabras Prohibidas</h3>
                 <div class="overflow-x-auto">
                     <table class="w-full">
                         <thead>
-                            <tr class="border-b" id="tableHeader">
-                                <th class="text-left p-3">ID</th>
-                                <th class="text-left p-3">Palabra</th>
-                                <th class="text-left p-3">Estado</th>
-                                <th class="text-left p-3">Acción</th>
+                            <tr class="border-b border-gray-200 bg-gray-50">
+                                <th class="text-left p-3 font-semibold text-gray-700">ID</th>
+                                <th class="text-left p-3 font-semibold text-gray-700">Palabra</th>
+                                <th class="text-left p-3 font-semibold text-gray-700">Estado</th>
+                                <th class="text-left p-3 font-semibold text-gray-700">Estado Visual</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <?php while ($palabra = $palabras_result->fetch_assoc()): ?>
-                                <tr class="border-b hover:bg-opacity-50 transition-colors" id="tableRow">
-                                    <td class="p-3"><?php echo $palabra['pro_id']; ?></td>
-                                    <td class="p-3 font-medium"><?php echo htmlspecialchars($palabra['palabra']); ?></td>
+                            <?php 
+                            $palabras_result->data_seek(0);
+                            while ($palabra = $palabras_result->fetch_assoc()): ?>
+                                <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                                    <td class="p-3 text-gray-700"><?php echo $palabra['pro_id']; ?></td>
+                                    <td class="p-3 text-gray-900 font-medium"><?php echo htmlspecialchars($palabra['palabra']); ?></td>
                                     <td class="p-3">
                                         <form method="POST" class="inline">
                                             <input type="hidden" name="action_palabra" value="actualizar_estado_palabra">
                                             <input type="hidden" name="pro_id" value="<?php echo $palabra['pro_id']; ?>">
-                                            <select name="nuevo_estado" onchange="this.form.submit()" class="px-2 py-1 rounded border text-sm" id="selectInline">
+                                            <select name="nuevo_estado" onchange="this.form.submit()" class="px-2 py-1 rounded border border-gray-300 text-sm bg-white text-gray-700">
                                                 <?php 
                                                 $estados_result->data_seek(0);
                                                 while ($estado = $estados_result->fetch_assoc()): ?>
@@ -617,7 +810,7 @@ $stats = $stats_result->fetch_assoc();
                                         </form>
                                     </td>
                                     <td class="p-3">
-                                        <span class="text-xs px-2 py-1 rounded <?php 
+                                        <span class="text-xs px-3 py-1 rounded-full font-medium <?php 
                                             echo $palabra['est_id'] == 1 ? 'bg-red-100 text-red-800' : 'bg-gray-100 text-gray-800'; 
                                         ?>">
                                             <?php echo $palabra['estado_nombre']; ?>
@@ -632,39 +825,41 @@ $stats = $stats_result->fetch_assoc();
         </div>
 
         <!-- Tab: Infracciones -->
-        <div id="tab-infracciones" class="tab-content hidden">
-            <div class="rounded-2xl shadow-xl p-6 transition-all duration-300" id="infractionsTableCard">
-                <h3 class="text-xl font-bold mb-4 flex items-center">
+        <div id="tab-infracciones" class="tab-content">
+            <div class="bg-white rounded-2xl shadow-xl p-6">
+                <h3 class="text-xl font-bold mb-4 flex items-center text-gray-800">
                     <i data-feather="alert-triangle" class="w-5 h-5 mr-2 text-yellow-500"></i>Registro de Infracciones
                 </h3>
                 <div class="overflow-x-auto">
                     <table class="w-full">
                         <thead>
-                            <tr class="border-b" id="tableHeader">
-                                <th class="text-left p-3">ID</th>
-                                <th class="text-left p-3">Usuario</th>
-                                <th class="text-left p-3">Palabra</th>
-                                <th class="text-left p-3">Origen</th>
-                                <th class="text-left p-3">Contenido</th>
-                                <th class="text-left p-3">Fecha</th>
-                                <th class="text-left p-3">Estado</th>
+                            <tr class="border-b border-gray-200 bg-gray-50">
+                                <th class="text-left p-3 font-semibold text-gray-700">ID</th>
+                                <th class="text-left p-3 font-semibold text-gray-700">Usuario</th>
+                                <th class="text-left p-3 font-semibold text-gray-700">Palabra</th>
+                                <th class="text-left p-3 font-semibold text-gray-700">Origen</th>
+                                <th class="text-left p-3 font-semibold text-gray-700">Contenido</th>
+                                <th class="text-left p-3 font-semibold text-gray-700">Fecha</th>
+                                <th class="text-left p-3 font-semibold text-gray-700">Estado</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <?php while ($infraccion = $infracciones_result->fetch_assoc()): ?>
-                                <tr class="border-b hover:bg-opacity-50 transition-colors" id="tableRow">
-                                    <td class="p-3"><?php echo $infraccion['usu_pro_id']; ?></td>
-                                    <td class="p-3"><?php echo htmlspecialchars($infraccion['usuario_nombre']); ?></td>
+                            <?php 
+                            $infracciones_result->data_seek(0);
+                            while ($infraccion = $infracciones_result->fetch_assoc()): ?>
+                                <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                                    <td class="p-3 text-gray-700"><?php echo $infraccion['usu_pro_id']; ?></td>
+                                    <td class="p-3 text-gray-900 font-medium"><?php echo htmlspecialchars($infraccion['usuario_nombre']); ?></td>
                                     <td class="p-3">
-                                        <span class="px-2 py-1 bg-red-100 text-red-800 rounded text-sm font-medium">
+                                        <span class="px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm font-medium">
                                             <?php echo htmlspecialchars($infraccion['palabra']); ?>
                                         </span>
                                     </td>
-                                    <td class="p-3"><?php echo $infraccion['origen_nombre']; ?></td>
-                                    <td class="p-3 max-w-xs truncate"><?php echo htmlspecialchars($infraccion['contenido']); ?></td>
-                                    <td class="p-3 text-sm"><?php echo date('d/m/Y H:i', strtotime($infraccion['fecha'])); ?></td>
+                                    <td class="p-3 text-gray-600"><?php echo $infraccion['origen_nombre']; ?></td>
+                                    <td class="p-3 max-w-xs truncate text-gray-600"><?php echo htmlspecialchars($infraccion['contenido']); ?></td>
+                                    <td class="p-3 text-sm text-gray-600"><?php echo date('d/m/Y H:i', strtotime($infraccion['fecha'])); ?></td>
                                     <td class="p-3">
-                                        <span class="text-xs px-2 py-1 rounded <?php 
+                                        <span class="text-xs px-3 py-1 rounded-full font-medium <?php 
                                             echo $infraccion['est_id'] == 3 ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-800'; 
                                         ?>">
                                             <?php echo $infraccion['estado_nombre']; ?>
@@ -686,12 +881,14 @@ $stats = $stats_result->fetch_assoc();
         const themeToggle = document.getElementById('themeToggle');
         const body = document.getElementById('body');
         const navbar = document.getElementById('navbar');
+        const mainTitle = document.getElementById('mainTitle');
+        const adminName = document.getElementById('adminName');
+        const tabsContainer = document.getElementById('tabsContainer');
 
+        // Cargar tema guardado
         const savedTheme = localStorage.getItem('theme') || 'light';
         if (savedTheme === 'dark') {
             enableDarkMode();
-        } else {
-            enableLightMode();
         }
 
         themeToggle.addEventListener('click', () => {
@@ -706,252 +903,143 @@ $stats = $stats_result->fetch_assoc();
         });
 
         function enableDarkMode() {
-            body.className = 'min-h-screen transition-all duration-300 dark bg-gray-900 text-white';
-            navbar.className = 'shadow-lg transition-all duration-300 bg-gray-800 text-white';
+            body.className = 'min-h-screen bg-gray-900 text-white dark transition-all duration-300';
+            navbar.className = 'bg-gray-800 shadow-lg';
+            mainTitle.className = 'text-3xl font-bold mb-6 text-white';
+            adminName.className = 'hidden md:block font-medium text-gray-200';
+            tabsContainer.className = 'mb-6 bg-gray-800 p-2 rounded-xl shadow';
             
-            // Cards
-            const cards = document.querySelectorAll('[id$="Card"]');
-            cards.forEach(card => {
-                card.className = card.className.replace(/bg-\w+-\d+/, 'bg-gray-800');
-            });
-
-            // Stat cards
-            for (let i = 1; i <= 4; i++) {
-                const statCard = document.getElementById(`statCard${i}`);
-                if (statCard) statCard.className = 'rounded-xl shadow-lg p-6 transition-all duration-300 bg-gray-800 text-white';
-            }
-
-            // Tables
-            const tableHeaders = document.querySelectorAll('#tableHeader');
-            tableHeaders.forEach(th => {
-                th.className = 'border-b border-gray-700';
-            });
-
-            const tableRows = document.querySelectorAll('#tableRow');
-            tableRows.forEach(row => {
-                row.className = 'border-b border-gray-700 hover:bg-gray-700 hover:bg-opacity-50 transition-colors';
-            });
-
-            // Inputs
-            const inputs = document.querySelectorAll('[id^="inputField"], [id^="textareaField"], [id^="selectField"]');
-            inputs.forEach(input => {
-                input.className = input.className.replace(/border(\s|$)/, 'border border-gray-600 bg-gray-700 text-white ');
-            });
-
-            const selectInlines = document.querySelectorAll('#selectInline');
-            selectInlines.forEach(select => {
-                select.className = select.className.replace(/border/, 'border border-gray-600 bg-gray-700 text-white');
-            });
-
-            // Tabs
-            const tabsContainer = document.getElementById('tabsContainer');
-            if (tabsContainer) tabsContainer.className = 'mb-6 bg-gray-800 p-2 rounded-xl';
-
-            const tabBtns = document.querySelectorAll('.tab-btn');
-            tabBtns.forEach(btn => {
-                if (btn.classList.contains('active')) {
-                    btn.className = 'tab-btn px-6 py-3 rounded-lg font-medium transition-all duration-200 active bg-blue-600 text-white';
-                } else {
-                    btn.className = 'tab-btn px-6 py-3 rounded-lg font-medium transition-all duration-200 bg-gray-700 text-gray-300 hover:bg-gray-600';
+            // Mostrar/ocultar iconos
+            document.querySelectorAll('.dark-icon').forEach(icon => icon.classList.remove('hidden'));
+            document.querySelectorAll('.light-icon').forEach(icon => icon.classList.add('hidden'));
+            
+            // Cards principales
+            document.querySelectorAll('.bg-white').forEach(card => {
+                if (!card.closest('select') && !card.closest('input') && !card.querySelector('select')) {
+                    card.className = card.className.replace('bg-white', 'bg-gray-800');
                 }
             });
+            
+            // Textos
+            document.querySelectorAll('.text-gray-800, .text-gray-900').forEach(text => {
+                text.className = text.className.replace(/text-gray-[89]00/, 'text-white');
+            });
+            
+            document.querySelectorAll('.text-gray-700').forEach(text => {
+                if (!text.closest('select')) {
+                    text.className = text.className.replace('text-gray-700', 'text-gray-200');
+                }
+            });
+            
+            document.querySelectorAll('.text-gray-600').forEach(text => {
+                text.className = text.className.replace('text-gray-600', 'text-gray-300');
+            });
+            
+            // Bordes de tablas
+            document.querySelectorAll('.border-gray-200, .border-gray-100').forEach(border => {
+                border.className = border.className.replace(/border-gray-[12]00/, 'border-gray-700');
+            });
+            
+            document.querySelectorAll('.bg-gray-50').forEach(bg => {
+                if (!bg.classList.contains('focus:ring-2')) {
+                    bg.className = bg.className.replace('bg-gray-50', 'bg-gray-700');
+                }
+            });
+            
+            // Hover effects
+            document.querySelectorAll('.hover\\:bg-gray-50').forEach(hover => {
+                hover.className = hover.className.replace('hover:bg-gray-50', 'hover:bg-gray-700');
+            });
+            
+            document.querySelectorAll('.hover\\:bg-gray-200').forEach(hover => {
+                hover.className = hover.className.replace('hover:bg-gray-200', 'hover:bg-gray-600');
+            });
+            
+            // Inputs y selects - mantener fondo claro para legibilidad
+            document.querySelectorAll('input[type="text"], input[type="email"], input[type="number"], input[type="time"], input[type="file"], textarea, select').forEach(input => {
+                if (!input.classList.contains('rounded-full')) {
+                    input.className = input.className.replace(/border-gray-\d+/, 'border-gray-600 bg-gray-700 text-white');
+                }
+            });
+            
+            // Tabs
+            updateTabStyles();
         }
 
         function enableLightMode() {
-            body.className = 'min-h-screen transition-all duration-300 bg-gradient-to-br from-pink-100 to-blue-100 text-gray-900';
-            navbar.className = 'shadow-lg transition-all duration-300 bg-white text-gray-900';
+            body.className = 'min-h-screen bg-gradient-to-br from-pink-100 to-blue-100 transition-all duration-300';
+            navbar.className = 'bg-white shadow-lg';
+            mainTitle.className = 'text-3xl font-bold mb-6 text-gray-800';
+            adminName.className = 'hidden md:block font-medium text-gray-700';
+            tabsContainer.className = 'mb-6 bg-white p-2 rounded-xl shadow';
             
-            // Cards
-            const cards = document.querySelectorAll('[id$="Card"]');
-            cards.forEach(card => {
-                card.className = card.className.replace(/bg-gray-\d+/, 'bg-white');
-            });
+            // Mostrar/ocultar iconos
+            document.querySelectorAll('.dark-icon').forEach(icon => icon.classList.add('hidden'));
+            document.querySelectorAll('.light-icon').forEach(icon => icon.classList.remove('hidden'));
+            
+            // Recargar la página para restaurar clases originales
+            // O restaurar manualmente (más complejo)
+            location.reload();
+        }
 
-            // Stat cards
-            for (let i = 1; i <= 4; i++) {
-                const statCard = document.getElementById(`statCard${i}`);
-                if (statCard) statCard.className = 'rounded-xl shadow-lg p-6 transition-all duration-300 bg-white';
-            }
-
-            // Tables
-            const tableHeaders = document.querySelectorAll('#tableHeader');
-            tableHeaders.forEach(th => {
-                th.className = 'border-b border-gray-200';
-            });
-
-            const tableRows = document.querySelectorAll('#tableRow');
-            tableRows.forEach(row => {
-                row.className = 'border-b border-gray-200 hover:bg-gray-50 hover:bg-opacity-50 transition-colors';
-            });
-
-            // Inputs
-            const inputs = document.querySelectorAll('[id^="inputField"], [id^="textareaField"], [id^="selectField"]');
-            inputs.forEach(input => {
-                input.className = input.className.replace(/border-gray-\d+ bg-gray-\d+ text-white/, 'border bg-white text-gray-900');
-            });
-
-            const selectInlines = document.querySelectorAll('#selectInline');
-            selectInlines.forEach(select => {
-                select.className = select.className.replace(/border-gray-\d+ bg-gray-\d+ text-white/, 'border bg-white text-gray-900');
-            });
-
-            // Tabs
-            const tabsContainer = document.getElementById('tabsContainer');
-            if (tabsContainer) tabsContainer.className = 'mb-6 bg-white p-2 rounded-xl shadow';
-
-            const tabBtns = document.querySelectorAll('.tab-btn');
-            tabBtns.forEach(btn => {
-                if (btn.classList.contains('active')) {
-                    btn.className = 'tab-btn px-6 py-3 rounded-lg font-medium transition-all duration-200 active bg-blue-500 text-white';
+        function updateTabStyles() {
+            const isDark = body.classList.contains('dark');
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                if (btn.classList.contains('bg-blue-500')) {
+                    // Botón activo
+                    btn.className = isDark 
+                        ? 'tab-btn px-6 py-3 rounded-lg font-medium transition-all duration-200 bg-blue-600 text-white'
+                        : 'tab-btn px-6 py-3 rounded-lg font-medium transition-all duration-200 bg-blue-500 text-white';
                 } else {
-                    btn.className = 'tab-btn px-6 py-3 rounded-lg font-medium transition-all duration-200 bg-gray-100 text-gray-700 hover:bg-gray-200';
+                    // Botón inactivo
+                    btn.className = isDark
+                        ? 'tab-btn px-6 py-3 rounded-lg font-medium transition-all duration-200 bg-gray-700 text-gray-300 hover:bg-gray-600'
+                        : 'tab-btn px-6 py-3 rounded-lg font-medium transition-all duration-200 bg-gray-100 text-gray-700 hover:bg-gray-200';
                 }
             });
         }
 
         // Tab Management
         function showTab(tabName) {
-            // Hide all tabs
+            // Ocultar todos los tabs
             document.querySelectorAll('.tab-content').forEach(tab => {
-                tab.classList.add('hidden');
+                tab.classList.remove('active');
             });
 
-            // Show selected tab
-            document.getElementById('tab-' + tabName).classList.remove('hidden');
+            // Mostrar el tab seleccionado
+            document.getElementById('tab-' + tabName).classList.add('active');
 
-            // Update button styles
+            // Actualizar estilos de botones
+            const isDark = body.classList.contains('dark');
             document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.classList.remove('active');
-                if (body.classList.contains('dark')) {
-                    btn.className = 'tab-btn px-6 py-3 rounded-lg font-medium transition-all duration-200 bg-gray-700 text-gray-300 hover:bg-gray-600';
+                if (btn.dataset.tab === tabName) {
+                    // Botón activo
+                    btn.className = isDark
+                        ? 'tab-btn px-6 py-3 rounded-lg font-medium transition-all duration-200 bg-blue-600 text-white'
+                        : 'tab-btn px-6 py-3 rounded-lg font-medium transition-all duration-200 bg-blue-500 text-white';
                 } else {
-                    btn.className = 'tab-btn px-6 py-3 rounded-lg font-medium transition-all duration-200 bg-gray-100 text-gray-700 hover:bg-gray-200';
+                    // Botón inactivo
+                    btn.className = isDark
+                        ? 'tab-btn px-6 py-3 rounded-lg font-medium transition-all duration-200 bg-gray-700 text-gray-300 hover:bg-gray-600'
+                        : 'tab-btn px-6 py-3 rounded-lg font-medium transition-all duration-200 bg-gray-100 text-gray-700 hover:bg-gray-200';
                 }
             });
-
-            // Style active button
-            const activeBtn = document.querySelector(`[data-tab="${tabName}"]`);
-            activeBtn.classList.add('active');
-            if (body.classList.contains('dark')) {
-                activeBtn.className = 'tab-btn px-6 py-3 rounded-lg font-medium transition-all duration-200 active bg-blue-600 text-white';
-            } else {
-                activeBtn.className = 'tab-btn px-6 py-3 rounded-lg font-medium transition-all duration-200 active bg-blue-500 text-white';
-            }
 
             feather.replace();
         }
 
-        // Show first tab by default
+        // Mostrar primer tab por defecto
         showTab('usuarios');
+        
+        // Preview de imagen seleccionada
+        document.querySelectorAll('input[type="file"]').forEach(input => {
+            input.addEventListener('change', function(e) {
+                if (e.target.files && e.target.files[0]) {
+                    const fileName = e.target.files[0].name;
+                    console.log('Archivo seleccionado:', fileName);
+                }
+            });
+        });
     </script>
 </body>
 </html>
-                        Crear Usuario
-                    </button>
-                </form>
-            </div>
-
-            <div class="rounded-2xl shadow-xl p-6 transition-all duration-300" id="usersTableCard">
-                <h3 class="text-xl font-bold mb-4">Lista de Usuarios</h3>
-                <div class="overflow-x-auto">
-                    <table class="w-full">
-                        <thead>
-                            <tr class="border-b" id="tableHeader">
-                                <th class="text-left p-3">ID</th>
-                                <th class="text-left p-3">Nombre</th>
-                                <th class="text-left p-3">Email</th>
-                                <th class="text-left p-3">Rol</th>
-                                <th class="text-left p-3">Estado</th>
-                                <th class="text-left p-3">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php while ($user = $usuarios_result->fetch_assoc()): ?>
-                                <tr class="border-b hover:bg-opacity-50 transition-colors" id="tableRow">
-                                    <td class="p-3"><?php echo $user['usu_id']; ?></td>
-                                    <td class="p-3"><?php echo htmlspecialchars($user['nombre']); ?></td>
-                                    <td class="p-3"><?php echo htmlspecialchars($user['email']); ?></td>
-                                    <td class="p-3">
-                                        <form method="POST" class="inline">
-                                            <input type="hidden" name="action_usuario" value="cambiar_rol">
-                                            <input type="hidden" name="usu_id" value="<?php echo $user['usu_id']; ?>">
-                                            <select name="nuevo_rol" onchange="this.form.submit()" class="px-2 py-1 rounded border text-sm" id="selectInline">
-                                                <?php 
-                                                $roles_result->data_seek(0);
-                                                while ($rol = $roles_result->fetch_assoc()): ?>
-                                                    <option value="<?php echo $rol['rol_id']; ?>" <?php echo $user['rol_id'] == $rol['rol_id'] ? 'selected' : ''; ?>>
-                                                        <?php echo $rol['nombre']; ?>
-                                                    </option>
-                                                <?php endwhile; ?>
-                                            </select>
-                                        </form>
-                                    </td>
-                                    <td class="p-3">
-                                        <form method="POST" class="inline">
-                                            <input type="hidden" name="action_usuario" value="actualizar_estado">
-                                            <input type="hidden" name="usu_id" value="<?php echo $user['usu_id']; ?>">
-                                            <select name="nuevo_estado" onchange="this.form.submit()" class="px-2 py-1 rounded border text-sm <?php 
-                                                echo $user['est_id'] == 1 ? 'text-green-600' : 
-                                                     ($user['est_id'] == 4 ? 'text-red-600' : 'text-gray-600'); 
-                                            ?>" id="selectInline">
-                                                <?php 
-                                                $estados_result->data_seek(0);
-                                                while ($estado = $estados_result->fetch_assoc()): ?>
-                                                    <option value="<?php echo $estado['est_id']; ?>" <?php echo $user['est_id'] == $estado['est_id'] ? 'selected' : ''; ?>>
-                                                        <?php echo $estado['nombre']; ?>
-                                                    </option>
-                                                <?php endwhile; ?>
-                                            </select>
-                                        </form>
-                                    </td>
-                                    <td class="p-3">
-                                        <span class="text-xs px-2 py-1 rounded <?php 
-                                            echo $user['est_id'] == 1 ? 'bg-green-100 text-green-800' : 
-                                                 ($user['est_id'] == 4 ? 'bg-red-100 text-red-800' : 'bg-gray-100 text-gray-800'); 
-                                        ?>">
-                                            <?php echo $user['estado_nombre']; ?>
-                                        </span>
-                                    </td>
-                                </tr>
-                            <?php endwhile; ?>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <!-- Tab: Películas/Series -->
-        <div id="tab-peliculas" class="tab-content hidden">
-            <div class="rounded-2xl shadow-xl p-6 transition-all duration-300 mb-6" id="createMovieCard">
-                <h3 class="text-xl font-bold mb-4 flex items-center">
-                    <i data-feather="plus-circle" class="w-5 h-5 mr-2"></i>Añadir Película/Serie
-                </h3>
-                <form method="POST" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <input type="hidden" name="action_pelicula" value="crear_pelicula">
-                    <input type="text" name="nombre" placeholder="Nombre" required class="px-4 py-2 rounded-lg border" id="inputField4">
-                    <input type="text" name="poster" placeholder="Nombre del archivo poster (ej: poster.jpg)" class="px-4 py-2 rounded-lg border" id="inputField5">
-                    <textarea name="descripcion" placeholder="Descripción" required class="px-4 py-2 rounded-lg border md:col-span-2" rows="3" id="textareaField1"></textarea>
-                    <input type="number" name="emision" placeholder="Año de emisión" required class="px-4 py-2 rounded-lg border" id="inputField6">
-                    <input type="time" name="duracion" placeholder="Duración (HH:MM:SS)" step="1" value="00:00:00" class="px-4 py-2 rounded-lg border" id="inputField7">
-                    <input type="number" name="episodios" placeholder="Episodios (0 si es película)" value="0" class="px-4 py-2 rounded-lg border" id="inputField8">
-                    <select name="tipo_id" required class="px-4 py-2 rounded-lg border" id="selectField2">
-                        <?php while ($tipo = $tipos_result->fetch_assoc()): ?>
-                            <option value="<?php echo $tipo['tipo_id']; ?>"><?php echo $tipo['descripcion']; ?></option>
-                        <?php endwhile; ?>
-                    </select>
-                    <input type="text" name="pais" placeholder="País" required class="px-4 py-2 rounded-lg border" id="inputField9">
-                    <input type="text" name="idioma" placeholder="Idioma" required class="px-4 py-2 rounded-lg border" id="inputField10">
-                    <div class="md:col-span-2">
-                        <label class="block mb-2 font-medium">Géneros:</label>
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
-                            <?php 
-                            $generos_result->data_seek(0);
-                            while ($genero = $generos_result->fetch_assoc()): ?>
-                                <label class="flex items-center space-x-2">
-                                    <input type="checkbox" name="generos[]" value="<?php echo $genero['gen_id']; ?>" class="rounded">
-                                    <span><?php echo htmlspecialchars($genero['nombre']); ?></span>
-                                </label>
-                            <?php endwhile; ?>
-                        </div>
-                    </div>
-                    <button type="submit" class="md:col-span-2 px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">
